@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script>
+      // Suppress benign Vite WebSocket and HMR errors caused by disabled HMR on the platform
+      window.addEventListener('unhandledrejection', function(event) {
+        const msg = event.reason ? (event.reason.message || event.reason.toString()) : '';
+        if (msg && (
+          msg.includes('WebSocket') ||
+          msg.includes('websocket') ||
+          msg.includes('closed without opened') ||
+          msg.includes('vite')
+        )) {
+          event.preventDefault();
+          event.stopPropagation();
+        }
+      });
+      window.addEventListener('error', function(event) {
+        const msg = event.message || '';
+        if (msg && (
+          msg.includes('WebSocket') ||
+          msg.includes('websocket') ||
+          msg.includes('closed without opened') ||
+          msg.includes('vite')
+        )) {
+          event.preventDefault();
+          event.stopPropagation();
+        }
+      }, true);
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <title>Arcane Dice</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+

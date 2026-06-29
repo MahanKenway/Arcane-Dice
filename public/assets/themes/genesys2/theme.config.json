@@ -1,0 +1,17 @@
+{
+  "name": "Genesys2",
+  "systemName": "genesys2",
+  "author": "Frank Ali",
+  "version": 0.1,
+  "meshFile": "genesys.json",
+  "material": {
+    "type": "standard",
+    "diffuseTexture": "diffuse.jpg",
+    "bumpTexture": "normal.png",
+    "specularTexture": "metallic.jpg",
+    "diffuseLevel": 1,
+    "bumpLevel": 1,
+    "specularPower": 1
+  },
+  "diceAvailable": ["a","b","c","d","p","s"]
+}

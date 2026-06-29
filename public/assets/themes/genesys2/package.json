@@ -1,0 +1,32 @@
+{
+  "name": "@3d-dice/genesys",
+  "private": false,
+	"author": {
+	  "name": "Frank Ali"
+	},
+	"description": "Dice for the Genesys system",
+	"version": "0.1.0",
+	"keywords": [
+		"3D",
+		"dice",
+		"skins",
+		"theme",
+		"javascript",
+		"rpg",
+		"starwars",
+		"tabletop"
+	],
+	"license": "MIT",
+	"homepage": "https://fantasticdice.games",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/3d-dice/dice-themes",
+    "directory": "themes/genesys"
+	},
+	"bugs": {
+		"url": "https://github.com/3d-dice/dice-themes/issues"
+	},
+  "files": [
+		"*"
+	]
+}

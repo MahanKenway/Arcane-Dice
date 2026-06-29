@@ -1,0 +1,6 @@
+{
+  "name": "Arcane Dice",
+  "description": "A Baldur's Gate 3 inspired dice roller with an integrated AI dungeon master mode.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
