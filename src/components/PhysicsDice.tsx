@@ -2,12 +2,17 @@ import React, { useEffect, useRef, useImperativeHandle, forwardRef, useState } f
 import DiceBox from '@3d-dice/dice-box';
 
 export interface PhysicsDiceRef {
-  roll: (notation: string, themeColor: string, theme?: string) => Promise<any>;
+  roll: (notation: string, themeColor?: string, theme?: string) => Promise<any>;
   clear: () => void;
+  updateConfig: (themeColor?: string, theme?: string) => Promise<void>;
   isReady: boolean;
 }
 
-export const PhysicsDice = forwardRef<PhysicsDiceRef, {}>((props, ref) => {
+interface PhysicsDiceProps {
+  onReady?: () => void;
+}
+
+export const PhysicsDice = forwardRef<PhysicsDiceRef, PhysicsDiceProps>((props, ref) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const diceBoxRef = useRef<any>(null);
   const [isReady, setIsReady] = useState(false);
@@ -18,11 +23,15 @@ export const PhysicsDice = forwardRef<PhysicsDiceRef, {}>((props, ref) => {
     if (!containerRef.current) return;
     containerRef.current.id = 'physics-dice-box';
     
+    // Calculate asset path dynamically based on Vite's base URL for GitHub Pages support
+    const baseUrl = import.meta.env.BASE_URL || '/';
+    const assetPath = baseUrl.endsWith('/') ? `${baseUrl}assets/` : `${baseUrl}/assets/`;
+
     // Initialize the dice box
     const box = new DiceBox('#physics-dice-box', {
-      assetPath: '/assets/',
-      theme: 'rust',
-      preloadThemes: ['rust', 'diceOfRolling', 'gemstone', 'gemstoneMarble'],
+      assetPath,
+      theme: 'default',
+      preloadThemes: ['default'],
       scale: 14,
       spinForce: 15,
       throwForce: 6,
@@ -36,6 +45,9 @@ export const PhysicsDice = forwardRef<PhysicsDiceRef, {}>((props, ref) => {
       setIsReady(true);
       // Ensure immediate correct sizing on initialization
       box.resizeWorld();
+      if (props.onReady) {
+        props.onReady();
+      }
     });
 
     return () => {
@@ -46,33 +58,31 @@ export const PhysicsDice = forwardRef<PhysicsDiceRef, {}>((props, ref) => {
   }, []);
 
   useImperativeHandle(ref, () => ({
-    roll: async (notation: string, themeColor: string, theme?: string) => {
+    roll: async (notation: string, themeColor?: string, theme?: string) => {
       if (!diceBoxRef.current) return null;
-      const targetTheme = theme || 'rust';
       
-      // If theme is not loaded, load it. Avoid concurrent/duplicate loads for the same theme.
-      if (!diceBoxRef.current.themesLoadedData?.[targetTheme]?.diceAvailable) {
-        if (!loadingThemesRef.current[targetTheme]) {
-          loadingThemesRef.current[targetTheme] = diceBoxRef.current.loadTheme(targetTheme)
-            .catch((err: any) => {
-              console.error(`Failed to load theme ${targetTheme}:`, err);
-            })
-            .finally(() => {
-              delete loadingThemesRef.current[targetTheme];
-            });
-        }
-        await loadingThemesRef.current[targetTheme];
+      const options: any = {};
+      if (theme) options.theme = theme;
+      if (themeColor) options.themeColor = themeColor;
+      
+      // Update config first to ensure theme is loaded and ready before rolling
+      if (theme || themeColor) {
+        await diceBoxRef.current.updateConfig(options);
       }
       
-      // Secondary fallback: if still not loaded, fall back to 'rust' which is preloaded
-      const activeTheme = diceBoxRef.current.themesLoadedData?.[targetTheme]?.diceAvailable ? targetTheme : 'rust';
-      
-      return diceBoxRef.current.roll(notation, { themeColor, theme: activeTheme });
+      return diceBoxRef.current.roll(notation, options);
     },
     clear: () => {
       if (diceBoxRef.current) {
         diceBoxRef.current.clear();
       }
+    },
+    updateConfig: async (themeColor?: string, theme?: string) => {
+      if (!diceBoxRef.current) return;
+      const options: any = {};
+      if (theme) options.theme = theme;
+      if (themeColor) options.themeColor = themeColor;
+      await diceBoxRef.current.updateConfig(options);
     },
     isReady
   }));

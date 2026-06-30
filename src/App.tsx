@@ -27,11 +27,16 @@ const BACKGROUNDS = [
 ];
 
 const MATERIALS: { id: DiceMaterial, name: string, color: string, hex: string, theme: string }[] = [
-  { id: 'slate', name: 'Iron Slate', color: 'bg-slate-500', hex: '#475569', theme: 'rust' },
-  { id: 'gold', name: 'Divine Gold', color: 'bg-yellow-500', hex: '#eab308', theme: 'diceOfRolling' },
-  { id: 'ruby', name: 'Blood Ruby', color: 'bg-red-600', hex: '#dc2626', theme: 'gemstone' },
-  { id: 'emerald', name: 'Fey Emerald', color: 'bg-emerald-500', hex: '#10b981', theme: 'gemstoneMarble' },
-  { id: 'amethyst', name: 'Void Amethyst', color: 'bg-purple-600', hex: '#9333ea', theme: 'gemstone' }
+  { id: 'slate', name: 'Iron Slate', color: 'bg-slate-500', hex: '#475569', theme: 'default' },
+  { id: 'gold', name: 'Divine Gold', color: 'bg-yellow-500', hex: '#dfb15b', theme: 'default' },
+  { id: 'ruby', name: 'Blood Ruby', color: 'bg-red-600', hex: '#b22222', theme: 'default' },
+  { id: 'emerald', name: 'Fey Emerald', color: 'bg-emerald-500', hex: '#1b4d3e', theme: 'default' },
+  { id: 'amethyst', name: 'Void Amethyst', color: 'bg-purple-600', hex: '#5d3fd3', theme: 'default' },
+  { id: 'rock', name: 'Ancient Granite', color: 'bg-zinc-500', hex: '#708090', theme: 'default' },
+  { id: 'sapphire', name: 'Celestial Sapphire', color: 'bg-blue-600', hex: '#0f52ba', theme: 'default' },
+  { id: 'bronze', name: 'Weathered Bronze', color: 'bg-amber-600', hex: '#ca8a04', theme: 'default' },
+  { id: 'silver', name: 'Astral Silver', color: 'bg-slate-300', hex: '#cbd5e1', theme: 'default' },
+  { id: 'obsidian', name: 'Void Obsidian', color: 'bg-stone-900', hex: '#111827', theme: 'default' }
 ];
 
 export default function App() {
@@ -52,8 +57,15 @@ export default function App() {
 
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isPhysicsReady, setIsPhysicsReady] = useState(false);
   
   const physicsDiceRef = useRef<PhysicsDiceRef>(null);
+
+  useEffect(() => {
+    if (!isPhysicsReady || !physicsDiceRef.current) return;
+    const selectedMaterial = MATERIALS.find(m => m.id === material) || MATERIALS[0];
+    physicsDiceRef.current.updateConfig(selectedMaterial.hex, selectedMaterial.theme);
+  }, [material, isPhysicsReady]);
 
   useEffect(() => {
     const saved = localStorage.getItem('arcane_dice_history');
@@ -274,7 +286,7 @@ export default function App() {
       </header>
 
       {/* Physics Dice Canvas Overlay */}
-      <PhysicsDice ref={physicsDiceRef} />
+      <PhysicsDice ref={physicsDiceRef} onReady={() => setIsPhysicsReady(true)} />
 
       {/* Main Stage */}
       <main className="relative z-10 flex-1 flex flex-col items-center justify-center p-6 max-w-5xl mx-auto w-full">
