@@ -89,9 +89,13 @@ export default function App() {
   };
 
   const handleRoll = async (singleDiceType?: DiceType, count: number = 1) => {
-    if (!physicsDiceRef.current?.isReady) return;
+    // We don't block the roll if 3D is not ready! We just use the mathematical fallback!
+    const is3DReady = !!physicsDiceRef.current?.isReady;
     
-    physicsDiceRef.current.clear();
+    if (is3DReady) {
+      physicsDiceRef.current.clear();
+    }
+    
     setCurrentRoll(null);
     setIsRolling(true);
     setNarration('');
@@ -122,14 +126,27 @@ export default function App() {
         return;
       }
       
-      const result = await physicsDiceRef.current.roll(notation, selectedMaterial.hex, selectedMaterial.theme);
-      console.log('DiceBox result:', result);
-      playDiceSound();
+      let result = null;
+      if (is3DReady) {
+        try {
+          // 2.5 seconds timeout for 3D physics roll
+          result = await Promise.race([
+            physicsDiceRef.current.roll(notation, selectedMaterial.hex, selectedMaterial.theme),
+            new Promise<null>((_, reject) => setTimeout(() => reject(new Error('3D roll timed out')), 2500))
+          ]);
+          playDiceSound();
+        } catch (rollErr) {
+          console.warn("3D physics roll failed or timed out, falling back to math:", rollErr);
+          result = null;
+        }
+      } else {
+        console.info("3D physics engine not ready, using math roll.");
+      }
       
       let parsedRolls: { type: DiceType; value: number }[] = [];
       let totalSum = 0;
 
-      if (Array.isArray(result)) {
+      if (result && Array.isArray(result)) {
         result.forEach((group: any) => {
           if (group && Array.isArray(group.rolls)) {
             const sides = group.sides || 20;
@@ -153,21 +170,29 @@ export default function App() {
         });
       }
 
-      // Fallback if no rolls captured
+      // Mathematical Fallback (uses high-quality random values)
       if (parsedRolls.length === 0) {
         if (isPoolRoll) {
           (Object.entries(selectedPool) as [DiceType, number][]).forEach(([type, c]) => {
             const sides = parseInt(type.substring(1), 10);
             for (let i = 0; i < c; i++) {
-              parsedRolls.push({ type, value: sides });
-              totalSum += sides;
+              const val = Math.floor(Math.random() * sides) + 1;
+              parsedRolls.push({ type, value: val });
+              totalSum += val;
             }
           });
         } else {
           const dt = singleDiceType || activeDice;
           const sides = parseInt(dt.substring(1), 10);
-          parsedRolls.push({ type: dt, value: sides });
-          totalSum += sides;
+          const isAdvantageRoll = dt === 'd20' && advantageMode === 'advantage';
+          const isDisadvantageRoll = dt === 'd20' && advantageMode === 'disadvantage';
+          const actualCount = (isAdvantageRoll || isDisadvantageRoll) ? 2 : count;
+          
+          for (let i = 0; i < actualCount; i++) {
+            const val = Math.floor(Math.random() * sides) + 1;
+            parsedRolls.push({ type: dt, value: val });
+            totalSum += val;
+          }
         }
       }
 
@@ -224,7 +249,9 @@ export default function App() {
         allDiceRolls: parsedRolls
       };
 
-      // Let the 3D dice sit for a second before showing the result UI
+      // Show result delay: 1000ms if 3D ran, 200ms if we used fallback
+      const showDelay = result ? 1000 : 200;
+
       setTimeout(() => {
         setCurrentRoll(rollData);
         saveHistory([rollData, ...history]);
@@ -238,7 +265,7 @@ export default function App() {
           setNarration(getNarrativeForRoll(rolledValue, sidesOfFirst));
         }
         setIsRolling(false);
-      }, 1000);
+      }, showDelay);
 
     } catch (err) {
       console.error("Roll failed:", err);
@@ -246,8 +273,36 @@ export default function App() {
     }
   };
 
+  const handleClear = () => {
+    if (physicsDiceRef.current?.isReady) {
+      physicsDiceRef.current.clear();
+    }
+    setCurrentRoll(null);
+    setNarration('');
+  };
+
+  const handleBackgroundClick = (e: React.MouseEvent) => {
+    const target = e.target as HTMLElement;
+    if (
+      target.closest('button') || 
+      target.closest('input') || 
+      target.closest('.selection-rail') || 
+      target.closest('.settings-modal') || 
+      target.closest('.history-modal') ||
+      target.closest('.interactive-card') ||
+      target.closest('header') ||
+      target.closest('footer')
+    ) {
+      return;
+    }
+    handleClear();
+  };
+
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-200 font-sans overflow-hidden flex flex-col relative selection:bg-indigo-900/50">
+    <div 
+      onClick={handleBackgroundClick}
+      className="min-h-screen bg-slate-950 text-slate-200 font-sans overflow-hidden flex flex-col relative selection:bg-indigo-900/50 cursor-default"
+    >
       {/* Mystical Background */}
       <div 
         className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat opacity-30 mix-blend-luminosity transition-all duration-1000 grayscale-[40%]"
@@ -484,12 +539,20 @@ export default function App() {
                   </motion.div>
                 )}
 
-                <button
-                  onClick={() => lastRollWasPool ? handleRoll() : handleRoll(activeDice)}
-                  className="mt-4 px-8 py-2 border border-slate-600/50 rounded-full font-serif text-slate-300 tracking-widest uppercase hover:bg-slate-800/50 transition-colors bg-slate-950/80 backdrop-blur-sm shadow-xl"
-                >
-                  Reroll
-                </button>
+                <div className="flex gap-4">
+                  <button
+                    onClick={() => lastRollWasPool ? handleRoll() : handleRoll(activeDice)}
+                    className="mt-4 px-8 py-2 border border-slate-600/50 rounded-full font-serif text-slate-300 tracking-widest uppercase hover:bg-slate-800/50 transition-colors bg-slate-950/80 backdrop-blur-sm shadow-xl cursor-pointer"
+                  >
+                    Reroll
+                  </button>
+                  <button
+                    onClick={handleClear}
+                    className="mt-4 px-8 py-2 border border-rose-950/30 rounded-full font-serif text-rose-400 hover:text-rose-300 tracking-widest uppercase hover:bg-rose-950/20 transition-colors bg-rose-950/10 backdrop-blur-sm shadow-xl cursor-pointer"
+                  >
+                    Clear
+                  </button>
+                </div>
               </motion.div>
             )}
             {isRolling && (
@@ -612,8 +675,10 @@ export default function App() {
               const countInPool = selectedPool[dice] || 0;
               const isSelected = isMultiMode ? countInPool > 0 : activeDice === dice;
               return (
-                <button
+                <motion.button
                   key={dice}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                   onClick={() => {
                     if (isMultiMode) {
                       setSelectedPool(prev => ({
@@ -624,29 +689,74 @@ export default function App() {
                       handleRoll(dice);
                     }
                   }}
-                  className="w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0 relative group outline-none"
+                  className="w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0 relative group outline-none cursor-pointer"
                 >
-                  {isMultiMode && countInPool > 0 && (
-                    <div className="absolute -top-1.5 -right-1.5 bg-indigo-500 text-slate-100 font-mono text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center border border-slate-950 z-20 shadow-md animate-scale-in">
-                      {countInPool}
-                    </div>
-                  )}
-                  <div className={cn(
-                    "absolute inset-0 bg-slate-900 rounded-2xl transform rotate-3 transition-all duration-300 border shadow-lg group-hover:rotate-6 group-hover:bg-slate-800 group-hover:border-slate-500",
-                    isSelected ? "border-slate-400 bg-slate-800 scale-105 shadow-[0_0_15px_rgba(148,163,184,0.3)]" : "border-slate-700"
-                  )} />
+                  <AnimatePresence>
+                    {isMultiMode && countInPool > 0 && (
+                      <motion.div
+                        key={`${dice}-count-${countInPool}`}
+                        initial={{ scale: 0.4, opacity: 0 }}
+                        animate={{ 
+                          scale: [0.4, 1.25, 1],
+                          opacity: 1
+                        }}
+                        exit={{ scale: 0, opacity: 0 }}
+                        transition={{ type: "spring", stiffness: 500, damping: 15 }}
+                        className="absolute -top-1.5 -right-1.5 bg-indigo-500 text-slate-100 font-mono text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center border border-slate-950 z-20 shadow-md"
+                      >
+                        {countInPool}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                  <motion.div 
+                    initial={{ rotate: 3, scale: 1 }}
+                    animate={{
+                      scale: isSelected ? 1.05 : 1,
+                      rotate: isSelected ? 6 : 3,
+                      borderColor: isSelected ? "rgb(226, 232, 240)" : "rgb(51, 65, 85)",
+                      backgroundColor: isSelected ? "rgb(30, 41, 59)" : "rgb(15, 23, 42)",
+                    }}
+                    whileHover={{ 
+                      rotate: isSelected ? 8 : 6,
+                      scale: isSelected ? 1.08 : 1.03,
+                      backgroundColor: "rgb(30, 41, 59)",
+                      borderColor: isSelected ? "rgb(226, 232, 240)" : "rgb(100, 116, 139)"
+                    }}
+                    transition={{ type: "spring", stiffness: 400, damping: 18 }}
+                    className={cn(
+                      "absolute inset-0 rounded-2xl border shadow-lg",
+                      isSelected ? "shadow-[0_0_15px_rgba(148,163,184,0.3)]" : ""
+                    )}
+                  />
                   <div className="absolute inset-0 flex items-center justify-center flex-col z-10">
-                    <DiceIcon 
-                      type={dice} 
-                      material={material}
-                      className={cn(
-                        "w-8 h-8 transition-all duration-300 group-hover:opacity-100 group-hover:scale-110", 
-                        isSelected ? "opacity-100 scale-110" : "opacity-70"
-                      )} 
-                    />
+                    <motion.div
+                      animate={{
+                        scale: isSelected ? 1.15 : 1,
+                        rotate: isSelected ? [0, 15, -10, 0] : 0,
+                        y: isSelected ? -2 : 0,
+                      }}
+                      transition={{
+                        type: "spring",
+                        stiffness: 400,
+                        damping: 15,
+                        rotate: {
+                          duration: 0.4,
+                          ease: "easeOut"
+                        }
+                      }}
+                    >
+                      <DiceIcon 
+                        type={dice} 
+                        material={material}
+                        className={cn(
+                          "w-8 h-8 transition-opacity duration-300", 
+                          isSelected ? "opacity-100" : "opacity-70 group-hover:opacity-100"
+                        )} 
+                      />
+                    </motion.div>
                     <span className={cn("text-xs font-bold mt-2 tracking-widest transition-colors", isSelected ? "text-slate-200" : "text-slate-500 group-hover:text-slate-300")}>{dice}</span>
                   </div>
-                </button>
+                </motion.button>
               );
             })}
           </div>

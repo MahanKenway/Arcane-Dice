@@ -16,20 +16,32 @@ export const PhysicsDice = forwardRef<PhysicsDiceRef, PhysicsDiceProps>((props, 
   const containerRef = useRef<HTMLDivElement>(null);
   const diceBoxRef = useRef<any>(null);
   const [isReady, setIsReady] = useState(false);
-
-  const loadingThemesRef = useRef<Record<string, Promise<any>>>({});
+  const initializingRef = useRef(false);
 
   useEffect(() => {
     if (!containerRef.current) return;
+    if (initializingRef.current) return;
+    initializingRef.current = true;
+
     containerRef.current.id = 'physics-dice-box';
+    containerRef.current.innerHTML = ''; // Clear container to prevent duplicate canvas elements
     
-    // Calculate asset path dynamically based on Vite's base URL for GitHub Pages support
-    const baseUrl = import.meta.env.BASE_URL || '/';
-    const assetPath = baseUrl.endsWith('/') ? `${baseUrl}assets/` : `${baseUrl}/assets/`;
+    // Calculate asset path dynamically based on window.location for robust GitHub Pages and Web Worker support
+    let basePath = window.location.pathname;
+    if (basePath.endsWith('.html') || basePath.endsWith('.htm')) {
+      const lastSlash = basePath.lastIndexOf('/');
+      basePath = basePath.substring(0, lastSlash + 1);
+    }
+    if (!basePath.endsWith('/')) {
+      basePath += '/';
+    }
+    const assetPath = `${basePath}assets/`;
+    console.log('DiceBox Dynamic Asset Path:', assetPath, 'Origin:', window.location.origin);
 
     // Initialize the dice box
     const box = new DiceBox('#physics-dice-box', {
       assetPath,
+      origin: window.location.origin,
       theme: 'default',
       preloadThemes: ['default'],
       scale: 14,
@@ -40,19 +52,27 @@ export const PhysicsDice = forwardRef<PhysicsDiceRef, PhysicsDiceProps>((props, 
       lightIntensity: 1.2,
     });
 
-    box.init().then(() => {
-      diceBoxRef.current = box;
-      setIsReady(true);
-      // Ensure immediate correct sizing on initialization
-      box.resizeWorld();
-      if (props.onReady) {
-        props.onReady();
-      }
-    });
+    box.init()
+      .then(() => {
+        diceBoxRef.current = box;
+        setIsReady(true);
+        // Ensure immediate correct sizing on initialization
+        box.resizeWorld();
+        if (props.onReady) {
+          props.onReady();
+        }
+      })
+      .catch((err: any) => {
+        console.error('Failed to initialize DiceBox:', err);
+      });
 
     return () => {
       if (diceBoxRef.current) {
-        diceBoxRef.current.clear();
+        try {
+          diceBoxRef.current.clear();
+        } catch (e) {
+          console.warn('Error during DiceBox cleanup:', e);
+        }
       }
     };
   }, []);
@@ -69,6 +89,9 @@ export const PhysicsDice = forwardRef<PhysicsDiceRef, PhysicsDiceProps>((props, 
       if (theme || themeColor) {
         await diceBoxRef.current.updateConfig(options);
       }
+      
+      // Clear right before rolling to avoid any leftover dice or race conditions
+      diceBoxRef.current.clear();
       
       return diceBoxRef.current.roll(notation, options);
     },
