@@ -32,11 +32,19 @@ const MATERIALS: { id: DiceMaterial, name: string, color: string, hex: string, t
   { id: 'ruby', name: 'Blood Ruby', color: 'bg-red-600', hex: '#b22222', theme: 'default' },
   { id: 'emerald', name: 'Fey Emerald', color: 'bg-emerald-500', hex: '#1b4d3e', theme: 'default' },
   { id: 'amethyst', name: 'Void Amethyst', color: 'bg-purple-600', hex: '#5d3fd3', theme: 'default' },
-  { id: 'rock', name: 'Ancient Granite', color: 'bg-zinc-500', hex: '#708090', theme: 'default' },
+  { id: 'rock', name: 'Ancient Granite', color: 'bg-zinc-500', hex: '#708090', theme: 'rock' },
   { id: 'sapphire', name: 'Celestial Sapphire', color: 'bg-blue-600', hex: '#0f52ba', theme: 'default' },
   { id: 'bronze', name: 'Weathered Bronze', color: 'bg-amber-600', hex: '#ca8a04', theme: 'default' },
   { id: 'silver', name: 'Astral Silver', color: 'bg-slate-300', hex: '#cbd5e1', theme: 'default' },
-  { id: 'obsidian', name: 'Void Obsidian', color: 'bg-stone-900', hex: '#111827', theme: 'default' }
+  { id: 'obsidian', name: 'Void Obsidian', color: 'bg-stone-900', hex: '#111827', theme: 'default' },
+  { id: 'rust', name: 'Rusted Iron', color: 'bg-amber-700', hex: '#b5511b', theme: 'rust' },
+  { id: 'wooden', name: 'Ancient Wood', color: 'bg-amber-900', hex: '#8b5a2b', theme: 'wooden' },
+  { id: 'gemstone', name: 'Teal Gemstone', color: 'bg-teal-600', hex: '#0d9488', theme: 'gemstone' },
+  { id: 'marble', name: 'Marble Amethyst', color: 'bg-fuchsia-700', hex: '#9333ea', theme: 'gemstoneMarble' },
+  { id: 'metal_bg', name: 'Lagoon Metal', color: 'bg-cyan-700', hex: '#0e7490', theme: 'blueGreenMetal' },
+  { id: 'smooth', name: 'Rose Smooth', color: 'bg-rose-500', hex: '#f43f5e', theme: 'smooth' },
+  { id: 'smooth_pip', name: 'Emerald Smooth Pip', color: 'bg-emerald-500', hex: '#10b981', theme: 'smooth-pip' },
+  { id: 'rolling', name: 'Gold-Flecked Rolling', color: 'bg-yellow-600', hex: '#eab308', theme: 'diceOfRolling' }
 ];
 
 export default function App() {
@@ -90,9 +98,9 @@ export default function App() {
 
   const handleRoll = async (singleDiceType?: DiceType, count: number = 1) => {
     // We don't block the roll if 3D is not ready! We just use the mathematical fallback!
-    const is3DReady = !!physicsDiceRef.current?.isReady;
+    const is3DReady = isPhysicsReady && !!physicsDiceRef.current;
     
-    if (is3DReady) {
+    if (is3DReady && physicsDiceRef.current) {
       physicsDiceRef.current.clear();
     }
     
@@ -127,16 +135,12 @@ export default function App() {
       }
       
       let result = null;
-      if (is3DReady) {
+      if (is3DReady && physicsDiceRef.current) {
         try {
-          // 2.5 seconds timeout for 3D physics roll
-          result = await Promise.race([
-            physicsDiceRef.current.roll(notation, selectedMaterial.hex, selectedMaterial.theme),
-            new Promise<null>((_, reject) => setTimeout(() => reject(new Error('3D roll timed out')), 2500))
-          ]);
+          result = await physicsDiceRef.current.roll(notation, selectedMaterial.hex, selectedMaterial.theme);
           playDiceSound();
         } catch (rollErr) {
-          console.warn("3D physics roll failed or timed out, falling back to math:", rollErr);
+          console.warn("3D physics roll failed, falling back to math:", rollErr);
           result = null;
         }
       } else {
@@ -274,7 +278,7 @@ export default function App() {
   };
 
   const handleClear = () => {
-    if (physicsDiceRef.current?.isReady) {
+    if (isPhysicsReady && physicsDiceRef.current) {
       physicsDiceRef.current.clear();
     }
     setCurrentRoll(null);
@@ -355,6 +359,14 @@ export default function App() {
             material === 'emerald' ? "bg-emerald-600 opacity-20" :
             material === 'amethyst' ? "bg-purple-600 opacity-20" :
             material === 'gold' ? "bg-yellow-600 opacity-20" :
+            material === 'rust' ? "bg-orange-700 opacity-20" :
+            material === 'wooden' ? "bg-amber-800 opacity-20" :
+            material === 'gemstone' ? "bg-teal-500 opacity-20" :
+            material === 'marble' ? "bg-fuchsia-600 opacity-20" :
+            material === 'metal_bg' ? "bg-cyan-600 opacity-20" :
+            material === 'smooth' ? "bg-rose-500 opacity-20" :
+            material === 'smooth_pip' ? "bg-emerald-400 opacity-20" :
+            material === 'rolling' ? "bg-amber-500 opacity-20" :
             "bg-slate-400 opacity-10",
             currentRoll?.isCriticalSuccess ? "bg-slate-100 opacity-30" : 
             currentRoll?.isCriticalFailure ? "bg-red-700 opacity-30" : 

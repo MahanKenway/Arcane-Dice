@@ -1,7 +1,7 @@
 import React from 'react';
 import { cn } from '../utils';
 
-export type DiceMaterial = 'slate' | 'gold' | 'ruby' | 'emerald' | 'amethyst' | 'rock' | 'sapphire' | 'bronze' | 'silver' | 'obsidian';
+export type DiceMaterial = 'slate' | 'gold' | 'ruby' | 'emerald' | 'amethyst' | 'rock' | 'sapphire' | 'bronze' | 'silver' | 'obsidian' | 'rust' | 'wooden' | 'gemstone' | 'marble' | 'metal_bg' | 'smooth' | 'smooth_pip' | 'rolling';
 export type DiceType = 'd4' | 'd6' | 'd8' | 'd10' | 'd12' | 'd20' | 'd100';
 
 interface DiceIconProps extends React.SVGProps<SVGSVGElement> {
@@ -23,6 +23,14 @@ const materials = {
   bronze: { stop1: '#fde047', stop2: '#ca8a04', stop3: '#713f12', fill: '#1c0d02', line: '#422006' },
   silver: { stop1: '#f1f5f9', stop2: '#cbd5e1', stop3: '#475569', fill: '#0f172a', line: '#334155' },
   obsidian: { stop1: '#4b5563', stop2: '#1f2937', stop3: '#111827', fill: '#030712', line: '#1f2937' },
+  rust: { stop1: '#ea580c', stop2: '#9a3412', stop3: '#451a03', fill: '#2d0f01', line: '#7c2d12' },
+  wooden: { stop1: '#b45309', stop2: '#78350f', stop3: '#451a03', fill: '#2d0f01', line: '#78350f' },
+  gemstone: { stop1: '#2dd4bf', stop2: '#0d9488', stop3: '#115e59', fill: '#042f2e', line: '#0f766e' },
+  marble: { stop1: '#e879f9', stop2: '#a21caf', stop3: '#701a75', fill: '#4a044e', line: '#86198f' },
+  metal_bg: { stop1: '#22d3ee', stop2: '#0891b2', stop3: '#164e63', fill: '#083344', line: '#0e7490' },
+  smooth: { stop1: '#fda4af', stop2: '#f43f5e', stop3: '#9f1239', fill: '#4c0519', line: '#e11d48' },
+  smooth_pip: { stop1: '#6ee7b7', stop2: '#10b981', stop3: '#065f46', fill: '#022c22', line: '#059669' },
+  rolling: { stop1: '#fef08a', stop2: '#f59e0b', stop3: '#b45309', fill: '#451a03', line: '#d97706' },
 };
 
 export function DiceIcon({ className, value, type, isRolling, material = 'slate', ...props }: DiceIconProps) {

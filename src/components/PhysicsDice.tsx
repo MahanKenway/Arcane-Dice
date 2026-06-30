@@ -16,13 +16,11 @@ export const PhysicsDice = forwardRef<PhysicsDiceRef, PhysicsDiceProps>((props, 
   const containerRef = useRef<HTMLDivElement>(null);
   const diceBoxRef = useRef<any>(null);
   const [isReady, setIsReady] = useState(false);
-  const initializingRef = useRef(false);
 
   useEffect(() => {
     if (!containerRef.current) return;
-    if (initializingRef.current) return;
-    initializingRef.current = true;
-
+    
+    let active = true;
     containerRef.current.id = 'physics-dice-box';
     containerRef.current.innerHTML = ''; // Clear container to prevent duplicate canvas elements
     
@@ -54,6 +52,12 @@ export const PhysicsDice = forwardRef<PhysicsDiceRef, PhysicsDiceProps>((props, 
 
     box.init()
       .then(() => {
+        if (!active) {
+          try {
+            box.clear();
+          } catch (e) {}
+          return;
+        }
         diceBoxRef.current = box;
         setIsReady(true);
         // Ensure immediate correct sizing on initialization
@@ -63,16 +67,21 @@ export const PhysicsDice = forwardRef<PhysicsDiceRef, PhysicsDiceProps>((props, 
         }
       })
       .catch((err: any) => {
-        console.error('Failed to initialize DiceBox:', err);
+        if (active) {
+          console.error('Failed to initialize DiceBox:', err);
+        }
       });
 
     return () => {
+      active = false;
+      setIsReady(false);
       if (diceBoxRef.current) {
         try {
           diceBoxRef.current.clear();
         } catch (e) {
           console.warn('Error during DiceBox cleanup:', e);
         }
+        diceBoxRef.current = null;
       }
     };
   }, []);
