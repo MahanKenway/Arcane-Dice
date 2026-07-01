@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { History, Dices, RotateCcw, Plus, Minus, Settings2, X, Palette, Image as ImageIcon, TrendingUp, TrendingDown, Sparkles } from 'lucide-react';
+import { History, Dices, RotateCcw, Plus, Minus, Settings2, X, Palette, Image as ImageIcon, TrendingUp, TrendingDown, Sparkles, Volume2, VolumeX } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from './utils';
 import { RollResult, DiceType } from './gameLogic';
@@ -144,8 +144,46 @@ export default function App() {
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isPhysicsReady, setIsPhysicsReady] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
   
   const physicsDiceRef = useRef<PhysicsDiceRef>(null);
+  const bgMusicRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    // Initialize background music
+    const audio = new Audio('https://upload.wikimedia.org/wikipedia/commons/1/1a/Forest_Ambience.ogg');
+    audio.loop = true;
+    audio.volume = 0.15; // Keep volume low
+    bgMusicRef.current = audio;
+
+    return () => {
+      audio.pause();
+      audio.src = '';
+    };
+  }, []);
+
+  // Attempt to play music on first user interaction if not muted
+  useEffect(() => {
+    const handleFirstInteraction = () => {
+      if (bgMusicRef.current && !isMuted) {
+        bgMusicRef.current.play().catch(e => console.log('Audio autoplay blocked:', e));
+      }
+      document.removeEventListener('click', handleFirstInteraction);
+    };
+    document.addEventListener('click', handleFirstInteraction);
+    return () => document.removeEventListener('click', handleFirstInteraction);
+  }, [isMuted]);
+
+  useEffect(() => {
+    if (bgMusicRef.current) {
+      bgMusicRef.current.muted = isMuted;
+      if (!isMuted) {
+        bgMusicRef.current.play().catch(e => console.log('Audio play blocked:', e));
+      } else {
+        bgMusicRef.current.pause();
+      }
+    }
+  }, [isMuted]);
 
   // Dynamic color cycling for Prismatic Rainbow 3D dice!
   const [rainbowColor, setRainbowColor] = useState('#ff3366');
@@ -245,7 +283,7 @@ export default function App() {
         try {
           const targetHex = material === 'prismatic' ? rainbowColor : selectedMaterial.hex;
           result = await physicsDiceRef.current.roll(notation, targetHex, selectedMaterial.theme);
-          playDiceSound();
+          playDiceSound(isMuted);
         } catch (rollErr) {
           console.warn("3D physics roll failed, falling back to math:", rollErr);
           result = null;
@@ -439,6 +477,13 @@ export default function App() {
         </div>
 
         <div className="flex items-center gap-4">
+          <button
+            onClick={() => setIsMuted(!isMuted)}
+            className="flex items-center justify-center w-12 h-12 bg-slate-900/60 border border-slate-700/50 hover:bg-slate-800 hover:border-slate-500 rounded-full text-slate-300 transition-all duration-300 backdrop-blur-md shadow-lg"
+            title={isMuted ? "Unmute Audio" : "Mute Audio"}
+          >
+            {isMuted ? <VolumeX className="w-5 h-5 text-slate-500" /> : <Volume2 className="w-5 h-5" />}
+          </button>
           <button 
             onClick={() => setIsSettingsOpen(true)}
             className="flex items-center justify-center w-12 h-12 bg-slate-900/60 border border-slate-700/50 hover:bg-slate-800 hover:border-slate-500 rounded-full text-slate-300 transition-all duration-300 backdrop-blur-md shadow-lg"
