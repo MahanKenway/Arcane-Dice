@@ -26,23 +26,11 @@ export const PhysicsDice = forwardRef<PhysicsDiceRef, PhysicsDiceProps>((props, 
     containerRef.current.innerHTML = ''; // Clear container to prevent duplicate canvas elements
     
     // Calculate asset path dynamically based on window.location for robust GitHub Pages and Web Worker support
-    let basePath = window.location.pathname;
-    if (basePath.endsWith('.html') || basePath.endsWith('.htm')) {
-      const lastSlash = basePath.lastIndexOf('/');
-      basePath = basePath.substring(0, lastSlash + 1);
-    }
-    if (!basePath.endsWith('/')) {
-      basePath += '/';
-    }
-    const assetPath = `${basePath}assets/`;
-    console.log('DiceBox Dynamic Asset Path:', assetPath, 'Origin:', window.location.origin);
-
     // Initialize the dice box
     const box = new DiceBox('#physics-dice-box', {
-      assetPath,
-      origin: window.location.origin,
+      assetPath: '/assets/',
       theme: 'default',
-      preloadThemes: ['default', 'rock', 'wooden', 'rust', 'diceOfRolling', 'gemstone', 'gemstoneMarble', 'blueGreenMetal', 'smooth', 'smooth-pip'],
+      preloadThemes: ['default'],
       scale: 14,
       spinForce: 6,
       throwForce: 5,
@@ -95,21 +83,56 @@ export const PhysicsDice = forwardRef<PhysicsDiceRef, PhysicsDiceProps>((props, 
     };
   }, []);
 
+  useEffect(() => {
+    if (!isReady) return;
+
+    // Prefetch themes in the background to avoid initial load delay
+    const themesToPreload = ['rock', 'wooden', 'rust', 'diceOfRolling', 'gemstone', 'gemstoneMarble', 'blueGreenMetal', 'smooth', 'smooth-pip'];
+    
+    const prefetchThemes = async () => {
+      for (const theme of themesToPreload) {
+        try {
+          const res = await fetch(`/assets/themes/${theme}/theme.config.json`);
+          if (res.ok) {
+            const config = await res.json();
+            // Preload maps explicitly
+            const assets = [
+              config.texture, 
+              config.material, 
+              config.bump,
+              config.colorMap,
+              config.normalMap,
+              config.roughnessMap,
+              config.metalnessMap,
+            ].filter(Boolean);
+
+            for (const asset of assets) {
+              // Preload in cache without evaluating
+              fetch(`/assets/themes/${theme}/${asset}`).catch(() => {});
+            }
+          }
+        } catch (e) {
+          // Silent fail for prefetch
+        }
+        // Small delay to prevent blocking network
+        await new Promise(r => setTimeout(r, 500));
+      }
+    };
+
+    if ('requestIdleCallback' in window) {
+      (window as any).requestIdleCallback(() => prefetchThemes());
+    } else {
+      setTimeout(prefetchThemes, 2000);
+    }
+  }, [isReady]);
+
   useImperativeHandle(ref, () => ({
     roll: async (notation: string, themeColor?: string, theme?: string) => {
       if (!diceBoxRef.current) return null;
       
       const options: any = {};
       if (theme) options.theme = theme;
-      
-      // Handle theme color rules:
-      // Standard texture-based themes must NOT use custom themeColor (must be #ffffff to prevent color distortion/black-out)
-      const standardThemes = ['wooden', 'gemstoneMarble', 'blueGreenMetal', 'diceOfRolling'];
-      if (theme && standardThemes.includes(theme)) {
-        options.themeColor = '#ffffff';
-      } else if (themeColor) {
-        options.themeColor = themeColor;
-      }
+      if (themeColor) options.themeColor = themeColor;
       
       // Update config first to ensure theme is loaded and ready before rolling
       await diceBoxRef.current.updateConfig(options);
@@ -128,14 +151,7 @@ export const PhysicsDice = forwardRef<PhysicsDiceRef, PhysicsDiceProps>((props, 
       if (!diceBoxRef.current) return;
       const options: any = {};
       if (theme) options.theme = theme;
-      
-      // Handle theme color rules:
-      const standardThemes = ['wooden', 'gemstoneMarble', 'blueGreenMetal', 'diceOfRolling'];
-      if (theme && standardThemes.includes(theme)) {
-        options.themeColor = '#ffffff';
-      } else if (themeColor) {
-        options.themeColor = themeColor;
-      }
+      if (themeColor) options.themeColor = themeColor;
       
       await diceBoxRef.current.updateConfig(options);
     },

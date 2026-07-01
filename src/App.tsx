@@ -65,8 +65,6 @@ const BACKGROUND_TINTS = [
   { id: 'none', name: 'Natural (No Tint)', class: 'from-black/80 via-black/40 to-transparent', bgClass: 'bg-black', border: 'border-white/50' },
 ];
 
-type DiceMaterial = 'prismatic' | 'slate' | 'gold' | 'ruby' | 'emerald' | 'amethyst' | 'rock' | 'sapphire' | 'bronze' | 'silver' | 'obsidian' | 'rust' | 'wooden' | 'gemstone' | 'marble' | 'metal_bg' | 'smooth' | 'smooth_pip' | 'rolling';
-
 const MATERIALS: { id: DiceMaterial, name: string, color: string, hex: string, theme: string }[] = [
   { id: 'prismatic', name: 'Prismatic Rainbow', color: 'bg-gradient-to-r from-red-500 via-green-500 to-blue-500', hex: '#ffffff', theme: 'default' },
   { id: 'slate', name: 'Iron Slate', color: 'bg-slate-500', hex: '#475569', theme: 'default' },
