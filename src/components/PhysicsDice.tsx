@@ -26,9 +26,22 @@ export const PhysicsDice = forwardRef<PhysicsDiceRef, PhysicsDiceProps>((props, 
     containerRef.current.innerHTML = ''; // Clear container to prevent duplicate canvas elements
     
     // Calculate asset path dynamically based on window.location for robust GitHub Pages and Web Worker support
+    let basePath = window.location.pathname;
+    if (basePath.endsWith('.html') || basePath.endsWith('.htm')) {
+      const lastSlash = basePath.lastIndexOf('/');
+      basePath = basePath.substring(0, lastSlash + 1);
+    }
+    if (!basePath.endsWith('/')) {
+      basePath += '/';
+    }
+    const assetPath = `${basePath}assets/`;
+    console.log('DiceBox Dynamic Asset Path:', assetPath, 'Origin:', window.location.origin);
+
     // Initialize the dice box
-    const box = new DiceBox('#physics-dice-box', {
-      assetPath: '/assets/',
+    const box = new DiceBox({
+      container: '#physics-dice-box',
+      assetPath,
+      origin: window.location.origin,
       theme: 'default',
       preloadThemes: ['default'],
       scale: 14,
@@ -89,10 +102,20 @@ export const PhysicsDice = forwardRef<PhysicsDiceRef, PhysicsDiceProps>((props, 
     // Prefetch themes in the background to avoid initial load delay
     const themesToPreload = ['rock', 'wooden', 'rust', 'diceOfRolling', 'gemstone', 'gemstoneMarble', 'blueGreenMetal', 'smooth', 'smooth-pip'];
     
+    // Dynamically calculate basePath inside prefetch as well
+    let basePath = window.location.pathname;
+    if (basePath.endsWith('.html') || basePath.endsWith('.htm')) {
+      const lastSlash = basePath.lastIndexOf('/');
+      basePath = basePath.substring(0, lastSlash + 1);
+    }
+    if (!basePath.endsWith('/')) {
+      basePath += '/';
+    }
+
     const prefetchThemes = async () => {
       for (const theme of themesToPreload) {
         try {
-          const res = await fetch(`/assets/themes/${theme}/theme.config.json`);
+          const res = await fetch(`${basePath}assets/themes/${theme}/theme.config.json`);
           if (res.ok) {
             const config = await res.json();
             // Preload maps explicitly
@@ -108,7 +131,7 @@ export const PhysicsDice = forwardRef<PhysicsDiceRef, PhysicsDiceProps>((props, 
 
             for (const asset of assets) {
               // Preload in cache without evaluating
-              fetch(`/assets/themes/${theme}/${asset}`).catch(() => {});
+              fetch(`${basePath}assets/themes/${theme}/${asset}`).catch(() => {});
             }
           }
         } catch (e) {
@@ -132,7 +155,12 @@ export const PhysicsDice = forwardRef<PhysicsDiceRef, PhysicsDiceProps>((props, 
       
       const options: any = {};
       if (theme) options.theme = theme;
-      if (themeColor) options.themeColor = themeColor;
+      
+      // Only apply themeColor if the theme is color-based (relying on grayscale textures for tinting)
+      const colorThemes = ['default', 'rock', 'rust', 'gemstone', 'smooth', 'smooth-pip'];
+      if (theme && colorThemes.includes(theme)) {
+        if (themeColor) options.themeColor = themeColor;
+      }
       
       // Update config first to ensure theme is loaded and ready before rolling
       await diceBoxRef.current.updateConfig(options);
@@ -151,7 +179,12 @@ export const PhysicsDice = forwardRef<PhysicsDiceRef, PhysicsDiceProps>((props, 
       if (!diceBoxRef.current) return;
       const options: any = {};
       if (theme) options.theme = theme;
-      if (themeColor) options.themeColor = themeColor;
+      
+      // Only apply themeColor if the theme is color-based (relying on grayscale textures for tinting)
+      const colorThemes = ['default', 'rock', 'rust', 'gemstone', 'smooth', 'smooth-pip'];
+      if (theme && colorThemes.includes(theme)) {
+        if (themeColor) options.themeColor = themeColor;
+      }
       
       await diceBoxRef.current.updateConfig(options);
     },
