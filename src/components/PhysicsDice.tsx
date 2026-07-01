@@ -21,6 +21,7 @@ export const PhysicsDice = forwardRef<PhysicsDiceRef, PhysicsDiceProps>((props, 
     if (!containerRef.current) return;
     
     let active = true;
+    let localBox: any = null;
     containerRef.current.id = 'physics-dice-box';
     containerRef.current.innerHTML = ''; // Clear container to prevent duplicate canvas elements
     
@@ -41,7 +42,7 @@ export const PhysicsDice = forwardRef<PhysicsDiceRef, PhysicsDiceProps>((props, 
       assetPath,
       origin: window.location.origin,
       theme: 'default',
-      preloadThemes: ['default'],
+      preloadThemes: ['default', 'rock', 'wooden', 'rust', 'diceOfRolling', 'gemstone', 'gemstoneMarble', 'blueGreenMetal', 'smooth', 'smooth-pip'],
       scale: 14,
       spinForce: 15,
       throwForce: 6,
@@ -58,6 +59,7 @@ export const PhysicsDice = forwardRef<PhysicsDiceRef, PhysicsDiceProps>((props, 
           } catch (e) {}
           return;
         }
+        localBox = box;
         diceBoxRef.current = box;
         setIsReady(true);
         // Ensure immediate correct sizing on initialization
@@ -75,12 +77,12 @@ export const PhysicsDice = forwardRef<PhysicsDiceRef, PhysicsDiceProps>((props, 
     return () => {
       active = false;
       setIsReady(false);
-      if (diceBoxRef.current) {
+      if (localBox) {
         try {
-          diceBoxRef.current.clear();
-        } catch (e) {
-          console.warn('Error during DiceBox cleanup:', e);
-        }
+          localBox.clear();
+        } catch (e) {}
+      }
+      if (diceBoxRef.current === localBox) {
         diceBoxRef.current = null;
       }
     };
@@ -92,12 +94,18 @@ export const PhysicsDice = forwardRef<PhysicsDiceRef, PhysicsDiceProps>((props, 
       
       const options: any = {};
       if (theme) options.theme = theme;
-      if (themeColor) options.themeColor = themeColor;
+      
+      // Handle theme color rules:
+      // Standard texture-based themes must NOT use custom themeColor (must be #ffffff to prevent color distortion/black-out)
+      const standardThemes = ['wooden', 'gemstoneMarble', 'blueGreenMetal', 'diceOfRolling'];
+      if (theme && standardThemes.includes(theme)) {
+        options.themeColor = '#ffffff';
+      } else if (themeColor) {
+        options.themeColor = themeColor;
+      }
       
       // Update config first to ensure theme is loaded and ready before rolling
-      if (theme || themeColor) {
-        await diceBoxRef.current.updateConfig(options);
-      }
+      await diceBoxRef.current.updateConfig(options);
       
       // Clear right before rolling to avoid any leftover dice or race conditions
       diceBoxRef.current.clear();
@@ -113,7 +121,15 @@ export const PhysicsDice = forwardRef<PhysicsDiceRef, PhysicsDiceProps>((props, 
       if (!diceBoxRef.current) return;
       const options: any = {};
       if (theme) options.theme = theme;
-      if (themeColor) options.themeColor = themeColor;
+      
+      // Handle theme color rules:
+      const standardThemes = ['wooden', 'gemstoneMarble', 'blueGreenMetal', 'diceOfRolling'];
+      if (theme && standardThemes.includes(theme)) {
+        options.themeColor = '#ffffff';
+      } else if (themeColor) {
+        options.themeColor = themeColor;
+      }
+      
       await diceBoxRef.current.updateConfig(options);
     },
     isReady

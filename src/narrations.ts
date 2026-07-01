@@ -37,7 +37,25 @@ export const getNarrativeForRoll = (roll: number, max: number = 20): string => {
       "I'm in danger! *giggles nervously*",
       "This is fine. (Everything is on fire in the background)",
       "To the shadow realm you go!",
-      "Well, that was a free trial of absolute failure."
+      "Well, that was a free trial of absolute failure.",
+      "You tried to do a barrel roll, but just crashed.",
+      "Mission failed, we'll get 'em next time.",
+      "Stop! Stop! He's already dead!",
+      "It's a bold strategy Cotton, let's see if it pays off for 'em.",
+      "I can't believe you've done this.",
+      "Why are we still here? Just to suffer?",
+      "The RNG gods are laughing at you right now.",
+      "You fell victim to one of the classic blunders!",
+      "Hello darkness, my old friend...",
+      "You rolled a 1. Your ancestors are weeping.",
+      "Error 404: Luck not found.",
+      "A swing and a massive, embarrassing miss.",
+      "This is the darkest timeline.",
+      "You are the weakest link. Goodbye.",
+      "Moments before disaster.",
+      "Even a broken clock is right twice a day, but this roll wasn't.",
+      "You rolled a 1. The dungeon master chuckles softly.",
+      "Crit fail! Time to write a new character sheet."
     ];
     return criticalFailures[Math.floor(Math.random() * criticalFailures.length)];
   }
@@ -76,7 +94,25 @@ export const getNarrativeForRoll = (roll: number, max: number = 20): string => {
       "Apex performance. The Gods of RNG are smiling upon you.",
       "That's a lot of damage! (To your foes, that is)",
       "He's too dangerous to be left alive!",
-      "A roll fit for a hero of legend."
+      "A roll fit for a hero of legend.",
+      "Are you not entertained?!",
+      "Praise the sun! A grossly incandescent roll!",
+      "This is Sparta! Absolute dominance.",
+      "You merely adopted the dark. I was born in it.",
+      "I love it when a plan comes together.",
+      "You bow to no one.",
+      "We're in the endgame now.",
+      "To boldly go where no roll has gone before.",
+      "I am the danger.",
+      "It's super effective!",
+      "Critical Hit! The enemy is staggered.",
+      "You have ascended beyond mere mortals.",
+      "A critical success. The bards will sing of this moment.",
+      "Glory and honor! A triumphant outcome.",
+      "You rolled max! RNGesus is with you.",
+      "Legendary status unlocked.",
+      "You rolled the maximum! What sorcery is this?",
+      "Fatality! Flawless victory."
     ];
     return criticalSuccesses[Math.floor(Math.random() * criticalSuccesses.length)];
   }
@@ -110,7 +146,27 @@ export const getNarrativeForRoll = (roll: number, max: number = 20): string => {
       "Houston, we've had a minor setback.",
       "You tried. Star sticker for effort! ⭐",
       "Not quite the chosen one, are you?",
-      "Reality check: You need to blow on the dice next time."
+      "Reality check: You need to blow on the dice next time.",
+      "This ain't it, chief.",
+      "You missed the mark by a mile.",
+      "Even a Stormtrooper could aim better.",
+      "Slightly better than a 1, which isn't saying much.",
+      "A disappointing display of skill.",
+      "The universe gave you a pity point.",
+      "You trip over your own feet.",
+      "I've seen mudcrabs with better reflexes.",
+      "Let's just pretend that didn't happen.",
+      "You gaze into the abyss, and the abyss laughs.",
+      "A tragedy in one act.",
+      "The universe has politely declined your request.",
+      "Critical yikes.",
+      "Did you even try, or was that an accident?",
+      "I expected nothing and I'm still let down.",
+      "That roll was so bad it needs a redemption arc.",
+      "I'm not mad, just disappointed.",
+      "Skill issue detected.",
+      "Your dice clearly have it in for you.",
+      "Even the NPCs are laughing."
     ];
     return lows[Math.floor(Math.random() * lows.length)];
   }
@@ -140,7 +196,22 @@ export const getNarrativeForRoll = (roll: number, max: number = 20): string => {
       "Not a triumph, but certainly not a disaster.",
       "A perfectly mundane outcome. The crowd is politely quiet.",
       "Balanced on the edge of greatness and failure.",
-      "You survived. No more, no less."
+      "You survived. No more, no less.",
+      "Middle of the pack. Just an ordinary day.",
+      "It passes the vibe check, barely.",
+      "Adequate. You meet expectations.",
+      "Nothing to write home about.",
+      "You did the thing. Congratulations.",
+      "A completely whelming experience.",
+      "50% of the time, it works every time.",
+      "Meh.",
+      "You perform with the enthusiasm of a DMV employee.",
+      "A beige roll for a beige moment.",
+      "The dice shrug their shoulders.",
+      "You are technically correct. The best kind of correct.",
+      "You rolled a solid C+.",
+      "Not the hero we deserve, nor the one we need right now.",
+      "Another day, another remarkably average roll."
     ];
     return mediums[Math.floor(Math.random() * mediums.length)];
   }
@@ -170,7 +241,24 @@ export const getNarrativeForRoll = (roll: number, max: number = 20): string => {
     "May the Force be with you. It clearly is.",
     "So civilized. A masterful showing.",
     "A near-perfect strike. The enemies are sweating.",
-    "Impressive. Most impressive."
+    "Impressive. Most impressive.",
+    "You're in the endgame now.",
+    "This is where the fun begins.",
+    "We will watch your career with great interest.",
+    "A fantastic display of prowess.",
+    "Almost perfect! Just a hair away.",
+    "You feel the power coursing through you.",
+    "A mighty blow that leaves a mark.",
+    "The dice favor the bold.",
+    "You strike with the fury of a thousand suns (almost).",
+    "A glorious maneuver. Huzzah!",
+    "Top tier performance, well played.",
+    "A roll worthy of a seasoned adventurer.",
+    "The bards will take notes on this one.",
+    "Unstoppable! You are a force of nature.",
+    "A roll crafted by the gods themselves.",
+    "Exquisite technique, flawlessly executed.",
+    "You shattered their expectations and their armor."
   ];
   return highs[Math.floor(Math.random() * highs.length)];
 };

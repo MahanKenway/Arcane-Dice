@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { History, Dices, RotateCcw, Plus, Minus, Settings2, X, Palette, Image as ImageIcon, TrendingUp, TrendingDown } from 'lucide-react';
+import { History, Dices, RotateCcw, Plus, Minus, Settings2, X, Palette, Image as ImageIcon, TrendingUp, TrendingDown, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from './utils';
 import { RollResult, DiceType } from './gameLogic';
@@ -8,25 +8,67 @@ import { getNarrativeForRoll } from './narrations';
 import { PhysicsDice, PhysicsDiceRef } from './components/PhysicsDice';
 import { playDiceSound } from './utils/audio';
 
+import pixelTavernBg from './assets/images/pixel_tavern_1782917884945.jpg';
+import pixelVoidBg from './assets/images/pixel_void_1782917906511.jpg';
+import fantasyDragonLairBg from './assets/images/fantasy_dragon_lair_1782917922387.jpg';
+import fantasyRuinsBg from './assets/images/fantasy_ruins_1782917939309.jpg';
+import pixelDungeonBg from './assets/images/pixel_dungeon_1782917956406.jpg';
+import cyberNeonBg from './assets/images/cyber_neon_1782917969801.jpg';
+import darkForestBg from './assets/images/dark_forest_1782917984275.jpg';
+import underdarkBg from './assets/images/underdark_1782918008872.jpg';
+import pixelCrystalCaveBg from './assets/images/pixel_crystal_cave_1782919292811.jpg';
+import pixelFloatingIslandBg from './assets/images/pixel_floating_island_1782919307912.jpg';
+import pixelCyberStreetBg from './assets/images/pixel_cyber_street_1782919324741.jpg';
+import pixelCozyLibraryBg from './assets/images/pixel_cozy_library_1782919338788.jpg';
+import pixelWaterfallTempleBg from './assets/images/pixel_waterfall_temple_1782919617924.jpg';
+import pixelVolcanoForgeBg from './assets/images/pixel_volcano_forge_1782919639447.jpg';
+import pixelSnowyPeakBg from './assets/images/pixel_snowy_peak_1782919863361.jpg';
+import pixelCursedSwampBg from './assets/images/pixel_cursed_swamp_1782919880602.jpg';
+import pixelDesertOasisBg from './assets/images/pixel_desert_oasis_1782919880602_1782920361362.jpg';
+import pixelHauntedMansionBg from './assets/images/pixel_haunted_mansion_1782919880602_1782920377130.jpg';
+import pixelUnderwaterRuinsBg from './assets/images/pixel_underwater_ruins_1782921053773.jpg';
+
 const BACKGROUNDS = [
-  { id: 'dungeon', name: 'Deep Dungeon', url: 'https://images.unsplash.com/photo-1605806616949-1e87b487cb2a?q=80&w=2700&auto=format&fit=crop' },
-  { id: 'forest', name: 'Enchanted Forest', url: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=2574&auto=format&fit=crop' },
-  { id: 'mountain', name: 'Misty Peaks', url: 'https://images.unsplash.com/photo-1519077224424-d2e8eb63eb9b?q=80&w=2600&auto=format&fit=crop' },
-  { id: 'cathedral', name: 'Gothic Cathedral', url: 'https://images.unsplash.com/photo-1614314115162-80db267677ea?q=80&w=2670&auto=format&fit=crop' },
-  { id: 'tavern', name: 'Cozy Tavern', url: 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?q=80&w=2574&auto=format&fit=crop' },
-  { id: 'volcanic', name: 'Volcanic Forge', url: 'https://images.unsplash.com/photo-1578593139888-39622e2047de?q=80&w=2600&auto=format&fit=crop' },
-  { id: 'library', name: "Wizard's Library", url: 'https://images.unsplash.com/photo-1507842217343-583bb7270b66?q=80&w=2600&auto=format&fit=crop' },
-  { id: 'astral', name: 'Astral Void', url: 'https://images.unsplash.com/photo-1462331940025-496dfbfc7564?q=80&w=2600&auto=format&fit=crop' },
+  { id: 'underwater_ruins', name: 'Pixel Underwater Ruins', url: pixelUnderwaterRuinsBg },
+  { id: 'desert_oasis', name: 'Pixel Desert Oasis', url: pixelDesertOasisBg },
+  { id: 'haunted_mansion', name: 'Pixel Haunted Mansion', url: pixelHauntedMansionBg },
+  { id: 'snowy_peak', name: 'Pixel Snowy Peak', url: pixelSnowyPeakBg },
+  { id: 'cursed_swamp', name: 'Pixel Cursed Swamp', url: pixelCursedSwampBg },
+  { id: 'temple_falls', name: 'Pixel Waterfall Temple', url: pixelWaterfallTempleBg },
+  { id: 'forge', name: 'Pixel Dwarven Forge', url: pixelVolcanoForgeBg },
+  { id: 'crystal', name: 'Pixel Crystal Cave', url: pixelCrystalCaveBg },
+  { id: 'floating', name: 'Pixel Floating Island', url: pixelFloatingIslandBg },
+  { id: 'cyber', name: 'Pixel Cyber Street', url: pixelCyberStreetBg },
+  { id: 'library', name: 'Pixel Cozy Library', url: pixelCozyLibraryBg },
+  { id: 'tavern', name: 'Pixel Tavern Hearth', url: pixelTavernBg },
+  { id: 'dungeon', name: 'Pixel Dungeon Corridor', url: pixelDungeonBg },
+  { id: 'void', name: 'Astral Void Nebula', url: pixelVoidBg },
+  { id: 'dragon', name: "Dragon's Lair", url: fantasyDragonLairBg },
+  { id: 'ruins', name: 'Overgrown Fantasy Ruins', url: fantasyRuinsBg },
+  { id: 'neon', name: 'Cyberpunk Neon Sanctum', url: cyberNeonBg },
+  { id: 'forest', name: 'Elven Dark Forest', url: darkForestBg },
+  { id: 'underdark', name: 'Glowing Underdark Caverns', url: underdarkBg },
   { id: 'abyss', name: 'Abyssal Depths', url: 'https://images.unsplash.com/photo-1551244072-5d12893278ab?q=80&w=2600&auto=format&fit=crop' },
   { id: 'desert', name: 'Scorching Sands', url: 'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?q=80&w=2600&auto=format&fit=crop' },
   { id: 'frozen', name: 'Frozen Keep', url: 'https://images.unsplash.com/photo-1542856391-010fb87dcfed?q=80&w=2600&auto=format&fit=crop' },
-  { id: 'dragon', name: "Dragon's Lair", url: 'https://images.unsplash.com/photo-1599733589046-9b8308b5b50d?q=80&w=2600&auto=format&fit=crop' },
-  { id: 'celestial', name: 'Celestial Temple', url: 'https://images.unsplash.com/photo-1518837695005-2083093ee35b?q=80&w=2600&auto=format&fit=crop' },
-  { id: 'elven', name: 'Elven Sanctuary', url: 'https://images.unsplash.com/photo-1501854140801-50d01698950b?q=80&w=2600&auto=format&fit=crop' },
-  { id: 'neon', name: 'Neon Sanctum', url: 'https://images.unsplash.com/photo-1515621061946-eff1c2a352bd?q=80&w=2600&auto=format&fit=crop' }
+  { id: 'citadel', name: 'Floating Citadel', url: 'https://images.unsplash.com/photo-1508739773434-c26b3d09e071?q=80&w=2600&auto=format&fit=crop' },
+  { id: 'ship', name: 'Starlight Airship', url: 'https://images.unsplash.com/photo-1511447333015-45b65e60f6d5?q=80&w=2600&auto=format&fit=crop' },
+  { id: 'temple', name: 'Sunken Temple', url: 'https://images.unsplash.com/photo-1541018939203-26ee57db2f75?q=80&w=2600&auto=format&fit=crop' }
 ];
 
+const BACKGROUND_TINTS = [
+  { id: 'slate', name: 'Dark Slate', class: 'from-slate-950 via-slate-950/80 to-slate-950/20', bgClass: 'bg-slate-950', border: 'border-slate-500' },
+  { id: 'indigo', name: 'Arcane Indigo', class: 'from-indigo-950 via-indigo-950/80 to-indigo-950/20', bgClass: 'bg-indigo-950', border: 'border-indigo-500' },
+  { id: 'rose', name: 'Blood Rose', class: 'from-rose-950 via-rose-950/80 to-rose-950/20', bgClass: 'bg-rose-950', border: 'border-rose-500' },
+  { id: 'emerald', name: 'Fey Emerald', class: 'from-emerald-950 via-emerald-950/80 to-emerald-950/20', bgClass: 'bg-emerald-950', border: 'border-emerald-500' },
+  { id: 'purple', name: 'Void Purple', class: 'from-purple-950 via-purple-950/80 to-purple-950/20', bgClass: 'bg-purple-950', border: 'border-purple-500' },
+  { id: 'none', name: 'Natural (No Tint)', class: 'from-black/80 via-black/40 to-transparent', bgClass: 'bg-black', border: 'border-white/50' },
+];
+
+type DiceMaterial = 'prismatic' | 'slate' | 'gold' | 'ruby' | 'emerald' | 'amethyst' | 'rock' | 'sapphire' | 'bronze' | 'silver' | 'obsidian' | 'rust' | 'wooden' | 'gemstone' | 'marble' | 'metal_bg' | 'smooth' | 'smooth_pip' | 'rolling';
+
 const MATERIALS: { id: DiceMaterial, name: string, color: string, hex: string, theme: string }[] = [
+  { id: 'prismatic', name: 'Prismatic Rainbow', color: 'bg-gradient-to-r from-red-500 via-green-500 to-blue-500', hex: '#ffffff', theme: 'default' },
   { id: 'slate', name: 'Iron Slate', color: 'bg-slate-500', hex: '#475569', theme: 'default' },
   { id: 'gold', name: 'Divine Gold', color: 'bg-yellow-500', hex: '#dfb15b', theme: 'default' },
   { id: 'ruby', name: 'Blood Ruby', color: 'bg-red-600', hex: '#b22222', theme: 'default' },
@@ -47,7 +89,36 @@ const MATERIALS: { id: DiceMaterial, name: string, color: string, hex: string, t
   { id: 'rolling', name: 'Gold-Flecked Rolling', color: 'bg-yellow-600', hex: '#eab308', theme: 'diceOfRolling' }
 ];
 
+import { auth, db } from './lib/firebase';
+import { onAuthStateChanged } from 'firebase/auth';
+import { collection, addDoc, getDocs, query, orderBy, limit } from 'firebase/firestore';
+
 export default function App() {
+  const [user, setUser] = useState<any>(null);
+
+  useEffect(() => {
+    const unsub = onAuthStateChanged(auth, u => {
+      setUser(u);
+      if (u) {
+        // Load history from Firestore
+        const loadHistory = async () => {
+          try {
+            const q = query(collection(db, `users/${u.uid}/history`), orderBy('timestamp', 'desc'), limit(20));
+            const snapshot = await getDocs(q);
+            const loadedHistory = snapshot.docs.map(doc => doc.data() as RollResult);
+            if (loadedHistory.length > 0) {
+              setHistory(loadedHistory);
+            }
+          } catch (e) {
+            console.error("Failed to load history from firestore", e);
+          }
+        };
+        loadHistory();
+      }
+    });
+    return unsub;
+  }, []);
+
   const [history, setHistory] = useState<RollResult[]>([]);
   const [isRolling, setIsRolling] = useState(false);
   const [currentRoll, setCurrentRoll] = useState<RollResult | null>(null);
@@ -61,7 +132,14 @@ export default function App() {
   
   // Randomly select background and material on load
   const [bgImage, setBgImage] = useState(() => BACKGROUNDS[Math.floor(Math.random() * BACKGROUNDS.length)].url);
-  const [material, setMaterial] = useState<DiceMaterial>('gold');
+  const [material, setMaterial] = useState<DiceMaterial>('prismatic');
+  const [bgOpacity, setBgOpacity] = useState<number>(() => {
+    const saved = localStorage.getItem('arcane_dice_bg_opacity');
+    return saved ? parseFloat(saved) : 0.35;
+  });
+  const [bgTint, setBgTint] = useState(() => {
+    return localStorage.getItem('arcane_dice_bg_tint') || 'slate';
+  });
 
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -69,26 +147,54 @@ export default function App() {
   
   const physicsDiceRef = useRef<PhysicsDiceRef>(null);
 
+  // Dynamic color cycling for Prismatic Rainbow 3D dice!
+  const [rainbowColor, setRainbowColor] = useState('#ff3366');
+
+  useEffect(() => {
+    if (material !== 'prismatic') return;
+
+    // Smooth beautiful rainbow cycle colors (red, orange, yellow, green, blue, purple)
+    const colors = ['#ff3366', '#ff9933', '#33cc66', '#3399ff', '#9933ff'];
+    let idx = 0;
+    const interval = setInterval(() => {
+      idx = (idx + 1) % colors.length;
+      setRainbowColor(colors[idx]);
+    }, 1500);
+
+    return () => clearInterval(interval);
+  }, [material]);
+
   useEffect(() => {
     if (!isPhysicsReady || !physicsDiceRef.current) return;
     const selectedMaterial = MATERIALS.find(m => m.id === material) || MATERIALS[0];
-    physicsDiceRef.current.updateConfig(selectedMaterial.hex, selectedMaterial.theme);
-  }, [material, isPhysicsReady]);
+    const targetHex = material === 'prismatic' ? rainbowColor : selectedMaterial.hex;
+    physicsDiceRef.current.updateConfig(targetHex, selectedMaterial.theme);
+  }, [material, rainbowColor, isPhysicsReady]);
 
   useEffect(() => {
     const saved = localStorage.getItem('arcane_dice_history');
-    if (saved) {
+    if (saved && !user) {
       try {
         setHistory(JSON.parse(saved));
       } catch (e) {
         console.error("Failed to parse history");
       }
     }
-  }, []);
+  }, [user]);
 
-  const saveHistory = (newHistory: RollResult[]) => {
+  const saveHistory = async (newHistory: RollResult[]) => {
     setHistory(newHistory);
     localStorage.setItem('arcane_dice_history', JSON.stringify(newHistory.slice(0, 20))); // Keep last 20
+    
+    // If logged in, save the latest roll to firestore
+    if (user && newHistory.length > 0) {
+      try {
+        const latestRoll = newHistory[0];
+        await addDoc(collection(db, `users/${user.uid}/history`), latestRoll);
+      } catch (e) {
+        console.error("Failed to save history to firestore", e);
+      }
+    }
   };
 
   const clearHistory = () => {
@@ -137,7 +243,8 @@ export default function App() {
       let result = null;
       if (is3DReady && physicsDiceRef.current) {
         try {
-          result = await physicsDiceRef.current.roll(notation, selectedMaterial.hex, selectedMaterial.theme);
+          const targetHex = material === 'prismatic' ? rainbowColor : selectedMaterial.hex;
+          result = await physicsDiceRef.current.roll(notation, targetHex, selectedMaterial.theme);
           playDiceSound();
         } catch (rollErr) {
           console.warn("3D physics roll failed, falling back to math:", rollErr);
@@ -302,17 +409,22 @@ export default function App() {
     handleClear();
   };
 
+  const activeTint = BACKGROUND_TINTS.find(t => t.id === bgTint) || BACKGROUND_TINTS[0];
+
   return (
     <div 
       onClick={handleBackgroundClick}
-      className="min-h-screen bg-slate-950 text-slate-200 font-sans overflow-hidden flex flex-col relative selection:bg-indigo-900/50 cursor-default"
+      className={cn("min-h-screen text-slate-200 font-sans overflow-hidden flex flex-col relative cursor-default transition-colors duration-1000", activeTint.bgClass)}
     >
       {/* Mystical Background */}
       <div 
-        className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat opacity-30 mix-blend-luminosity transition-all duration-1000 grayscale-[40%]"
-        style={{ backgroundImage: `url("${bgImage}")` }}
+        className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat transition-all duration-1000"
+        style={{ 
+          backgroundImage: `url("${bgImage}")`,
+          opacity: bgOpacity
+        }}
       />
-      <div className="absolute inset-0 z-0 bg-gradient-to-t from-slate-950 via-slate-950/80 to-slate-950/20" />
+      <div className={cn("absolute inset-0 z-0 bg-gradient-to-t transition-all duration-1000", activeTint.class)} />
       
       {/* Particles/Vignette */}
       <div className="absolute inset-0 z-0 pointer-events-none shadow-[inset_0_0_200px_rgba(0,0,0,0.95)]" />
@@ -355,6 +467,7 @@ export default function App() {
           {/* Ambient Glow based on Material */}
           <div className={cn(
             "absolute inset-0 rounded-full blur-3xl transition-colors duration-1000",
+            material === 'prismatic' ? "bg-indigo-500 shadow-[0_0_50px_rgba(255,100,255,0.4)] opacity-25 animate-pulse" :
             material === 'ruby' ? "bg-red-600 opacity-20" :
             material === 'emerald' ? "bg-emerald-600 opacity-20" :
             material === 'amethyst' ? "bg-purple-600 opacity-20" :
@@ -709,7 +822,7 @@ export default function App() {
                         key={`${dice}-count-${countInPool}`}
                         initial={{ scale: 0.4, opacity: 0 }}
                         animate={{ 
-                          scale: [0.4, 1.25, 1],
+                          scale: 1,
                           opacity: 1
                         }}
                         exit={{ scale: 0, opacity: 0 }}
@@ -1021,11 +1134,60 @@ export default function App() {
                 </section>
 
                 {/* Background Selection */}
-                <section>
-                  <div className="flex items-center gap-3 mb-4">
+                <section className="space-y-4">
+                  <div className="flex items-center gap-3 mb-1">
                     <ImageIcon className="w-5 h-5 text-slate-400" />
                     <h3 className="text-lg font-serif tracking-widest text-slate-300 uppercase">Environment</h3>
                   </div>
+
+                  {/* Environment Opacity Control */}
+                  <div className="bg-slate-950/40 p-4 rounded-xl border border-slate-800 space-y-2">
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs font-serif uppercase tracking-wider text-slate-400">Backdrop Opacity</span>
+                      <span className="text-xs font-mono text-slate-300 font-bold bg-slate-900 px-2 py-0.5 rounded-md border border-slate-800">
+                        {Math.round(bgOpacity * 100)}%
+                      </span>
+                    </div>
+                    <input 
+                      type="range"
+                      min="0"
+                      max="1"
+                      step="0.05"
+                      value={bgOpacity}
+                      onChange={(e) => {
+                        const val = parseFloat(e.target.value);
+                        setBgOpacity(val);
+                        localStorage.setItem('arcane_dice_bg_opacity', String(val));
+                      }}
+                      className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-slate-300 border-none outline-none focus:ring-1 focus:ring-slate-500"
+                    />
+                  </div>
+
+                  {/* Environment Tint Control */}
+                  <div className="bg-slate-950/40 p-4 rounded-xl border border-slate-800 space-y-4">
+                    <span className="text-xs font-serif uppercase tracking-wider text-slate-400">Backdrop Tint</span>
+                    <div className="grid grid-cols-3 gap-2">
+                      {BACKGROUND_TINTS.map(tint => (
+                        <button
+                          key={tint.id}
+                          onClick={() => {
+                            setBgTint(tint.id);
+                            localStorage.setItem('arcane_dice_bg_tint', tint.id);
+                          }}
+                          className={cn(
+                            "py-2 px-3 rounded-lg text-xs font-serif tracking-wider transition-all duration-300 border flex items-center justify-center gap-2",
+                            bgTint === tint.id 
+                              ? `bg-slate-800 text-slate-200 ${tint.border}`
+                              : "bg-slate-900/50 text-slate-400 border-slate-800 hover:bg-slate-900"
+                          )}
+                        >
+                          <div className={cn("w-3 h-3 rounded-full border border-white/20", tint.bgClass)} />
+                          {tint.name}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
                   <div className="flex flex-col gap-3">
                     {BACKGROUNDS.map(bg => (
                       <button

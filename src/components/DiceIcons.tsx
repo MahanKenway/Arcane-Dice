@@ -1,7 +1,7 @@
 import React from 'react';
 import { cn } from '../utils';
 
-export type DiceMaterial = 'slate' | 'gold' | 'ruby' | 'emerald' | 'amethyst' | 'rock' | 'sapphire' | 'bronze' | 'silver' | 'obsidian' | 'rust' | 'wooden' | 'gemstone' | 'marble' | 'metal_bg' | 'smooth' | 'smooth_pip' | 'rolling';
+export type DiceMaterial = 'slate' | 'gold' | 'ruby' | 'emerald' | 'amethyst' | 'rock' | 'sapphire' | 'bronze' | 'silver' | 'obsidian' | 'rust' | 'wooden' | 'gemstone' | 'marble' | 'metal_bg' | 'smooth' | 'smooth_pip' | 'rolling' | 'prismatic';
 export type DiceType = 'd4' | 'd6' | 'd8' | 'd10' | 'd12' | 'd20' | 'd100';
 
 interface DiceIconProps extends React.SVGProps<SVGSVGElement> {
@@ -31,6 +31,7 @@ const materials = {
   smooth: { stop1: '#fda4af', stop2: '#f43f5e', stop3: '#9f1239', fill: '#4c0519', line: '#e11d48' },
   smooth_pip: { stop1: '#6ee7b7', stop2: '#10b981', stop3: '#065f46', fill: '#022c22', line: '#059669' },
   rolling: { stop1: '#fef08a', stop2: '#f59e0b', stop3: '#b45309', fill: '#451a03', line: '#d97706' },
+  prismatic: { stop1: '#ffffff', stop2: '#00ffff', stop3: '#ff00ff', fill: '#0c0721', line: '#2a0e4a' },
 };
 
 export function DiceIcon({ className, value, type, isRolling, material = 'slate', ...props }: DiceIconProps) {
@@ -120,11 +121,22 @@ export function DiceIcon({ className, value, type, isRolling, material = 'slate'
       {...props}
     >
       <defs>
-        <linearGradient id={gradId} x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor={mat.stop1} />
-          <stop offset="50%" stopColor={mat.stop2} />
-          <stop offset="100%" stopColor={mat.stop3} />
-        </linearGradient>
+        {material === 'prismatic' ? (
+          <linearGradient id={gradId} x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#ff3366" />
+            <stop offset="20%" stopColor="#ff9933" />
+            <stop offset="40%" stopColor="#33cc66" />
+            <stop offset="60%" stopColor="#3399ff" />
+            <stop offset="80%" stopColor="#9933ff" />
+            <stop offset="100%" stopColor="#ff3366" />
+          </linearGradient>
+        ) : (
+          <linearGradient id={gradId} x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor={mat.stop1} />
+            <stop offset="50%" stopColor={mat.stop2} />
+            <stop offset="100%" stopColor={mat.stop3} />
+          </linearGradient>
+        )}
       </defs>
 
       {renderShape()}
