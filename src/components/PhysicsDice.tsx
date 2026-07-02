@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useImperativeHandle, forwardRef, useState } f
 import DiceBox from '@3d-dice/dice-box';
 
 export interface PhysicsDiceRef {
-  roll: (notation: string, themeColor?: string, theme?: string) => Promise<any>;
+  roll: (notation: string | string[], themeColor?: string, theme?: string) => Promise<any>;
   clear: () => void;
   updateConfig: (themeColor?: string, theme?: string) => Promise<void>;
   isReady: boolean;
@@ -35,15 +35,19 @@ export const PhysicsDice = forwardRef<PhysicsDiceRef, PhysicsDiceProps>((props, 
       basePath += '/';
     }
     const assetPath = `${basePath}assets/`;
-    console.log('DiceBox Dynamic Asset Path:', assetPath, 'Origin:', window.location.origin);
+    
+    // Robust origin detection for sandboxed iframes
+    const resolvedOrigin = window.location.origin === 'null' || !window.location.origin ? '' : window.location.origin;
+    console.log('DiceBox Dynamic Asset Path:', assetPath, 'Origin:', resolvedOrigin);
 
     // Initialize the dice box
     const box = new DiceBox({
       container: '#physics-dice-box',
       assetPath,
-      origin: window.location.origin,
+      origin: resolvedOrigin,
       theme: 'default',
       preloadThemes: ['default'],
+      offscreen: false, // Disable offscreen worker to ensure standard main-thread texture fetching in sandboxed iframes
       scale: 14,
       spinForce: 6,
       throwForce: 5,
@@ -150,15 +154,18 @@ export const PhysicsDice = forwardRef<PhysicsDiceRef, PhysicsDiceProps>((props, 
   }, [isReady]);
 
   useImperativeHandle(ref, () => ({
-    roll: async (notation: string, themeColor?: string, theme?: string) => {
+    roll: async (notation: string | string[], themeColor?: string, theme?: string) => {
       if (!diceBoxRef.current) return null;
       
-      const options: any = {};
-      if (theme) options.theme = theme;
+      const targetTheme = theme || 'default';
+      
+      const options: any = {
+        theme: targetTheme
+      };
       
       // Only apply themeColor if the theme is color-based (relying on grayscale textures for tinting)
       const colorThemes = ['default', 'rock', 'rust', 'gemstone', 'smooth', 'smooth-pip'];
-      if (theme && colorThemes.includes(theme)) {
+      if (colorThemes.includes(targetTheme)) {
         if (themeColor) options.themeColor = themeColor;
       }
       
@@ -177,12 +184,16 @@ export const PhysicsDice = forwardRef<PhysicsDiceRef, PhysicsDiceProps>((props, 
     },
     updateConfig: async (themeColor?: string, theme?: string) => {
       if (!diceBoxRef.current) return;
-      const options: any = {};
-      if (theme) options.theme = theme;
+      
+      const targetTheme = theme || 'default';
+      
+      const options: any = {
+        theme: targetTheme
+      };
       
       // Only apply themeColor if the theme is color-based (relying on grayscale textures for tinting)
       const colorThemes = ['default', 'rock', 'rust', 'gemstone', 'smooth', 'smooth-pip'];
-      if (theme && colorThemes.includes(theme)) {
+      if (colorThemes.includes(targetTheme)) {
         if (themeColor) options.themeColor = themeColor;
       }
       

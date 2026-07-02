@@ -255,23 +255,23 @@ export default function App() {
     try {
       const selectedMaterial = MATERIALS.find(m => m.id === material) || MATERIALS[0];
       
-      let notation = '';
+      let notation: string | string[] = '';
       if (isPoolRoll) {
-        // Construct composite notation from selectedPool
+        // Construct composite notation array from selectedPool for 3D physics engine to roll multiple groups correctly
         const parts = (Object.entries(selectedPool) as [DiceType, number][])
           .filter(([_, count]) => count > 0)
           .map(([type, count]) => `${count}${type}`);
-        notation = parts.join('+');
+        notation = parts;
       } else {
         const diceType = singleDiceType || activeDice;
-        const isAdvantageRoll = diceType === 'd20' && advantageMode === 'advantage';
-        const isDisadvantageRoll = diceType === 'd20' && advantageMode === 'disadvantage';
+        const isAdvantageRoll = advantageMode === 'advantage';
+        const isDisadvantageRoll = advantageMode === 'disadvantage';
         const actualCount = (isAdvantageRoll || isDisadvantageRoll) ? 2 : count;
         notation = `${actualCount}${diceType}`;
         setActiveDice(diceType);
       }
 
-      if (!notation) {
+      if (!notation || (Array.isArray(notation) && notation.length === 0)) {
         setIsRolling(false);
         return;
       }
@@ -295,24 +295,33 @@ export default function App() {
 
       if (result && Array.isArray(result)) {
         result.forEach((group: any) => {
-          if (group && Array.isArray(group.rolls)) {
-            const sides = group.sides || 20;
-            const groupType: DiceType = `d${sides}` as DiceType;
-            group.rolls.forEach((r: any) => {
+          if (group) {
+            let typeStr = "";
+            if (group.dieType) {
+              typeStr = group.dieType.toLowerCase();
+            } else if (group.sides) {
+              const sidesStr = String(group.sides).toLowerCase();
+              typeStr = sidesStr.startsWith("d") ? sidesStr : `d${sidesStr}`;
+            } else {
+              typeStr = "d20";
+            }
+            const groupType = typeStr as DiceType;
+
+            if (Array.isArray(group.rolls)) {
+              group.rolls.forEach((r: any) => {
+                parsedRolls.push({
+                  type: groupType,
+                  value: r.value
+                });
+                totalSum += r.value;
+              });
+            } else if (group.value !== undefined) {
               parsedRolls.push({
                 type: groupType,
-                value: r.value
+                value: group.value
               });
-              totalSum += r.value;
-            });
-          } else if (group && group.value !== undefined) {
-            const sides = group.sides || 20;
-            const groupType: DiceType = `d${sides}` as DiceType;
-            parsedRolls.push({
-              type: groupType,
-              value: group.value
-            });
-            totalSum += group.value;
+              totalSum += group.value;
+            }
           }
         });
       }
@@ -331,8 +340,8 @@ export default function App() {
         } else {
           const dt = singleDiceType || activeDice;
           const sides = parseInt(dt.substring(1), 10);
-          const isAdvantageRoll = dt === 'd20' && advantageMode === 'advantage';
-          const isDisadvantageRoll = dt === 'd20' && advantageMode === 'disadvantage';
+          const isAdvantageRoll = advantageMode === 'advantage';
+          const isDisadvantageRoll = advantageMode === 'disadvantage';
           const actualCount = (isAdvantageRoll || isDisadvantageRoll) ? 2 : count;
           
           for (let i = 0; i < actualCount; i++) {
@@ -353,8 +362,8 @@ export default function App() {
       if (!isPoolRoll) {
         const dt = singleDiceType || activeDice;
         const rollsOnly = parsedRolls.map(r => r.value);
-        const isAdvantageRoll = dt === 'd20' && advantageMode === 'advantage';
-        const isDisadvantageRoll = dt === 'd20' && advantageMode === 'disadvantage';
+        const isAdvantageRoll = advantageMode === 'advantage';
+        const isDisadvantageRoll = advantageMode === 'disadvantage';
         activeMode = (isAdvantageRoll || isDisadvantageRoll) ? advantageMode : 'none';
 
         if (activeMode === 'advantage' && rollsOnly.length >= 2) {
@@ -370,8 +379,8 @@ export default function App() {
         isCriticalFailure = dt === 'd20' && rolledValue === 1;
 
         displayNotation = `${count}${dt}`;
-        if (activeMode === 'advantage') displayNotation = `d20 with Advantage`;
-        else if (activeMode === 'disadvantage') displayNotation = `d20 with Disadvantage`;
+        if (activeMode === 'advantage') displayNotation = `${dt} with Advantage`;
+        else if (activeMode === 'disadvantage') displayNotation = `${dt} with Disadvantage`;
       } else {
         // Pool roll
         displayNotation = (Object.entries(selectedPool) as [DiceType, number][])
@@ -779,7 +788,7 @@ export default function App() {
                       ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/50 shadow-[0_0_10px_rgba(16,185,129,0.15)] font-bold" 
                       : "text-slate-500 hover:text-slate-300 hover:bg-slate-800 border-transparent"
                   )}
-                  title="Roll d20 with Advantage (Take highest of 2)"
+                  title={`Roll ${activeDice} with Advantage (Take highest of 2)`}
                 >
                   <TrendingUp className="w-3.5 h-3.5 text-emerald-500/70" />
                   Adv
@@ -792,7 +801,7 @@ export default function App() {
                       ? "bg-amber-500/20 text-amber-400 border-amber-500/50 shadow-[0_0_10px_rgba(245,158,11,0.15)] font-bold" 
                       : "text-slate-500 hover:text-slate-300 hover:bg-slate-800 border-transparent"
                   )}
-                  title="Roll d20 with Disadvantage (Take lowest of 2)"
+                  title={`Roll ${activeDice} with Disadvantage (Take lowest of 2)`}
                 >
                   <TrendingDown className="w-3.5 h-3.5 text-amber-500/70" />
                   Dis
@@ -838,7 +847,7 @@ export default function App() {
           </div>
 
           {/* Dice Selector Rail */}
-          <div className="flex gap-3 sm:gap-6 overflow-x-auto pb-2 md:pb-0 w-full md:w-auto justify-center hide-scrollbar">
+          <div className="flex gap-3 sm:gap-6 overflow-x-auto pb-2 md:pb-0 w-full justify-start md:justify-center px-4 md:px-0 hide-scrollbar">
             {(['d4', 'd6', 'd8', 'd10', 'd12', 'd20', 'd100'] as DiceType[]).map((dice) => {
               const countInPool = selectedPool[dice] || 0;
               const isSelected = isMultiMode ? countInPool > 0 : activeDice === dice;
@@ -917,7 +926,7 @@ export default function App() {
                         type={dice} 
                         material={material}
                         className={cn(
-                          "w-8 h-8 transition-opacity duration-300", 
+                          "w-10 h-10 sm:w-12 sm:h-12 transition-opacity duration-300", 
                           isSelected ? "opacity-100" : "opacity-70 group-hover:opacity-100"
                         )} 
                       />

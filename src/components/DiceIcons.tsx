@@ -105,13 +105,14 @@ export function DiceIcon({ className, value, type, isRolling, material = 'slate'
   let fontSize = 24;
   if (type === 'd20') { textY = 73; fontSize = 32; }
   else if (type === 'd12') { textY = 62; fontSize = 26; }
-  else if (type === 'd10' || type === 'd100') { textY = 62; fontSize = 22; }
+  else if (type === 'd10') { textY = 62; fontSize = 22; }
+  else if (type === 'd100') { textY = 61; fontSize = 16; }
   else if (type === 'd8') { textY = 60; fontSize = 26; }
   else if (type === 'd6') { textY = 62; fontSize = 32; }
-  else if (type === 'd4') { textY = 70; fontSize = 22; }
+  else if (type === 'd4') { textY = 68; fontSize = 22; }
 
   if (type === 'd100' && value !== undefined) {
-    fontSize = 18;
+    fontSize = 15;
   }
 
   return (
@@ -148,6 +149,9 @@ export function DiceIcon({ className, value, type, isRolling, material = 'slate'
           textAnchor="middle"
           fill={mat.stop1}
           fontSize={fontSize}
+          stroke={mat.fill}
+          strokeWidth="1.5"
+          paintOrder="stroke fill"
           className="font-serif font-bold select-none drop-shadow-md"
         >
           {value}
@@ -160,7 +164,10 @@ export function DiceIcon({ className, value, type, isRolling, material = 'slate'
           textAnchor="middle"
           fill={mat.stop2}
           fontSize={fontSize}
-          className="font-serif font-bold select-none opacity-50"
+          stroke={mat.fill}
+          strokeWidth="1.5"
+          paintOrder="stroke fill"
+          className="font-serif font-bold select-none opacity-95"
         >
           {type}
         </text>

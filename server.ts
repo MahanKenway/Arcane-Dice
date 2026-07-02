@@ -11,6 +11,18 @@ const PORT = 3000;
 
 app.use(express.json({ limit: "50mb" })); // for image uploads
 
+// Enable CORS for sandboxed iframe requests
+app.use((req, res, next) => {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, x-goog-api-key");
+  if (req.method === "OPTIONS") {
+    res.sendStatus(200);
+    return;
+  }
+  next();
+});
+
 // 1. Initialize Gemini Client
 const ai = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY,
