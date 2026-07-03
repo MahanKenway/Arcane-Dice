@@ -15,12 +15,29 @@ export default function BardicSoundscapes() {
   // Playlist states - loads custom tracks uploaded by the user from localStorage
   const [tracks, setTracks] = useState<Track[]>(() => {
     const saved = localStorage.getItem('bardic_custom_tracks');
-    return saved ? JSON.parse(saved) : [];
+    if (!saved) return [];
+    try {
+      const parsed: Track[] = JSON.parse(saved);
+      // Filter out invalid session-only blob URLs from previous sessions
+      const valid = parsed.filter(t => t.url && !t.url.startsWith('blob:'));
+      if (valid.length !== parsed.length) {
+        localStorage.setItem('bardic_custom_tracks', JSON.stringify(valid));
+      }
+      return valid;
+    } catch {
+      return [];
+    }
   });
   const [currentTrack, setCurrentTrack] = useState<Track | null>(() => {
     const saved = localStorage.getItem('bardic_custom_tracks');
-    const parsed = saved ? JSON.parse(saved) : [];
-    return parsed.length > 0 ? parsed[0] : null;
+    if (!saved) return null;
+    try {
+      const parsed: Track[] = JSON.parse(saved);
+      const valid = parsed.filter(t => t.url && !t.url.startsWith('blob:'));
+      return valid.length > 0 ? valid[0] : null;
+    } catch {
+      return null;
+    }
   });
   
   const [isPlaying, setIsPlaying] = useState(false);

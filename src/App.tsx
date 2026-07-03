@@ -130,7 +130,7 @@ export default function App() {
   
   // Randomly select background and material on load
   const [bgImage, setBgImage] = useState(() => BACKGROUNDS[Math.floor(Math.random() * BACKGROUNDS.length)].url);
-  const [material, setMaterial] = useState<DiceMaterial>('prismatic');
+  const [material, setMaterial] = useState<DiceMaterial>('rolling');
   const [bgOpacity, setBgOpacity] = useState<number>(() => {
     const saved = localStorage.getItem('arcane_dice_bg_opacity');
     return saved ? parseFloat(saved) : 0.35;
@@ -197,8 +197,8 @@ export default function App() {
   useEffect(() => {
     if (material !== 'prismatic') return;
 
-    // Smooth beautiful rainbow cycle colors (red, orange, yellow, green, blue, purple)
-    const colors = ['#ff3366', '#ff9933', '#33cc66', '#3399ff', '#9933ff'];
+    // Smooth beautiful rainbow cycle colors utilizing all working materials' hex colors!
+    const colors = MATERIALS.filter(m => m.id !== 'prismatic').map(m => m.hex);
     let idx = 0;
     const interval = setInterval(() => {
       idx = (idx + 1) % colors.length;
