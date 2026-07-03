@@ -34,7 +34,7 @@ export const PhysicsDice = forwardRef<PhysicsDiceRef, PhysicsDiceProps>((props, 
     if (!basePath.endsWith('/')) {
       basePath += '/';
     }
-    const assetPath = '/assets/';
+    const assetPath = `${basePath}assets/`;
     
     // Robust origin detection for sandboxed iframes
     const resolvedOrigin = window.location.origin === 'null' || !window.location.origin ? '' : window.location.origin;
