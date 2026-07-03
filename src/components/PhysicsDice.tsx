@@ -125,7 +125,7 @@ export const PhysicsDice = forwardRef<PhysicsDiceRef, PhysicsDiceProps>((props, 
             const assets: string[] = [];
             const addAsset = (val: any) => {
               if (typeof val === 'string' && val.length > 0) {
-                if (!val.startsWith('data:')) {
+                if (!val.startsWith('data:') && val.includes('.')) {
                   assets.push(val);
                 }
               } else if (typeof val === 'object' && val !== null) {
