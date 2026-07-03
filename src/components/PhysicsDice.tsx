@@ -121,16 +121,25 @@ export const PhysicsDice = forwardRef<PhysicsDiceRef, PhysicsDiceProps>((props, 
           const res = await fetch(`${basePath}assets/themes/${theme}/theme.config.json`);
           if (res.ok) {
             const config = await res.json();
-            // Preload maps explicitly
-            const assets = [
-              config.texture, 
-              config.material, 
-              config.bump,
-              config.colorMap,
-              config.normalMap,
-              config.roughnessMap,
-              config.metalnessMap,
-            ].filter(Boolean);
+            // Preload maps explicitly by recursively finding string assets
+            const assets: string[] = [];
+            const addAsset = (val: any) => {
+              if (typeof val === 'string' && val.length > 0) {
+                if (!val.startsWith('data:')) {
+                  assets.push(val);
+                }
+              } else if (typeof val === 'object' && val !== null) {
+                Object.values(val).forEach(addAsset);
+              }
+            };
+
+            addAsset(config.texture);
+            addAsset(config.material);
+            addAsset(config.bump);
+            addAsset(config.colorMap);
+            addAsset(config.normalMap);
+            addAsset(config.roughnessMap);
+            addAsset(config.metalnessMap);
 
             for (const asset of assets) {
               // Preload in cache without evaluating
