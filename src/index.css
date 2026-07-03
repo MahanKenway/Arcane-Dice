@@ -16,6 +16,22 @@
   }
 }
 
+/* Screen shake animation keyframes */
+@keyframes shake {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  10% { transform: translate(-5px, -3px) rotate(-1.5deg); }
+  20% { transform: translate(4px, 5px) rotate(1.5deg); }
+  30% { transform: translate(-4px, -5px) rotate(-1.5deg); }
+  40% { transform: translate(5px, 3px) rotate(1.5deg); }
+  55% { transform: translate(-3px, 4px) rotate(-1deg); }
+  70% { transform: translate(4px, -4px) rotate(0.8deg); }
+  85% { transform: translate(-1px, 2px) rotate(-0.5deg); }
+}
+
+.animate-shake {
+  animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+}
+
 /* Force 3D Dice Box Canvas to be full-screen and prevent cropping/clipping */
 #physics-dice-box canvas,
 .dice-box-canvas {
@@ -27,4 +43,5 @@
   pointer-events: none !important;
   z-index: 40 !important;
 }
+
 

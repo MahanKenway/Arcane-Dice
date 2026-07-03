@@ -1,12 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { History, Dices, RotateCcw, Plus, Minus, Settings2, X, Palette, Image as ImageIcon, TrendingUp, TrendingDown, Sparkles, Volume2, VolumeX } from 'lucide-react';
+import { History, Dices, RotateCcw, Plus, Minus, Settings2, X, Palette, Image as ImageIcon, TrendingUp, TrendingDown, Sparkles, Music, Play, Pause, Upload } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from './utils';
 import { RollResult, DiceType } from './gameLogic';
 import { DiceIcon, DiceMaterial } from './components/DiceIcons';
 import { getNarrativeForRoll } from './narrations';
 import { PhysicsDice, PhysicsDiceRef } from './components/PhysicsDice';
-import { playDiceSound } from './utils/audio';
 
 import pixelTavernBg from './assets/images/pixel_tavern_1782917884945.jpg';
 import pixelVoidBg from './assets/images/pixel_void_1782917906511.jpg';
@@ -142,46 +141,141 @@ export default function App() {
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isPhysicsReady, setIsPhysicsReady] = useState(false);
-  const [isMuted, setIsMuted] = useState(false);
   
+
+  const [shouldShake, setShouldShake] = useState(false);
+  const [particles, setParticles] = useState<{
+    id: number;
+    color: string;
+    size: number;
+    duration: number;
+    delay: number;
+    angle: number;
+    speed: number;
+  }[]>([]);
+
+  const triggerCriticalEffects = () => {
+    // 1. Screen Shake
+    setShouldShake(true);
+    setTimeout(() => setShouldShake(false), 500);
+
+    // 2. Celebratory Particles
+    const newParticles = Array.from({ length: 65 }).map((_, i) => {
+      const angle = Math.random() * Math.PI * 2;
+      const speed = 3 + Math.random() * 9;
+      const size = 6 + Math.random() * 12;
+      const colors = [
+        '#fbbf24', // Amber/Gold
+        '#f59e0b', // Deep Gold
+        '#d97706', // Dark Gold
+        '#eab308', // Yellow
+        '#fffbeb', // Light Gold/White sheen
+        '#dfb15b', // Divine Gold hex
+      ];
+      const color = colors[Math.floor(Math.random() * colors.length)];
+      return {
+        id: Date.now() + i + Math.random(),
+        color,
+        size,
+        duration: 1.2 + Math.random() * 1.8,
+        delay: Math.random() * 0.15,
+        angle,
+        speed,
+      };
+    });
+    setParticles(newParticles);
+    setTimeout(() => {
+      setParticles([]);
+    }, 3200);
+  };
+  
+  const [currentTrack, setCurrentTrack] = useState<{ id: string; name: string; url: string } | null>(null);
+
+  const [isPlayingMusic, setIsPlayingMusic] = useState(false);
+  const [customTracks, setCustomTracks] = useState<{ id: string; name: string; url: string }[]>([]);
+  const [musicVolume, setMusicVolume] = useState(0.15);
+
   const physicsDiceRef = useRef<PhysicsDiceRef>(null);
   const bgMusicRef = useRef<HTMLAudioElement | null>(null);
 
-  useEffect(() => {
-    // Initialize background music
-    const audio = new Audio('https://upload.wikimedia.org/wikipedia/commons/1/1a/Forest_Ambience.ogg');
-    audio.loop = true;
-    audio.volume = 0.15; // Keep volume low
-    bgMusicRef.current = audio;
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
 
-    return () => {
-      audio.pause();
-      audio.src = '';
-    };
-  }, []);
+    const fileList = Array.from(files) as File[];
+    const newTracks = fileList.map(file => {
+      const url = URL.createObjectURL(file);
+      return {
+        id: `custom_${Date.now()}_${Math.random()}`,
+        name: `🎵 ${file.name.replace(/\.[^/.]+$/, "")}`,
+        url
+      };
+    });
 
-  // Attempt to play music on first user interaction if not muted
+    setCustomTracks(prev => [...prev, ...newTracks]);
+    if (newTracks.length > 0) {
+      setCurrentTrack(newTracks[0]);
+      setIsPlayingMusic(true);
+    }
+  };
+
   useEffect(() => {
-    const handleFirstInteraction = () => {
-      if (bgMusicRef.current && !isMuted) {
-        bgMusicRef.current.play().catch(e => console.log('Audio autoplay blocked:', e));
+    if (!currentTrack) {
+      if (bgMusicRef.current) {
+        bgMusicRef.current.pause();
       }
-      document.removeEventListener('click', handleFirstInteraction);
-    };
-    document.addEventListener('click', handleFirstInteraction);
-    return () => document.removeEventListener('click', handleFirstInteraction);
-  }, [isMuted]);
+      return;
+    }
+
+    if (!bgMusicRef.current) {
+      bgMusicRef.current = new Audio(currentTrack.url);
+      bgMusicRef.current.loop = true;
+      bgMusicRef.current.volume = musicVolume;
+    } else {
+      bgMusicRef.current.pause();
+      bgMusicRef.current.src = currentTrack.url;
+      bgMusicRef.current.load();
+    }
+
+    if (isPlayingMusic) {
+      bgMusicRef.current.play()
+        .then(() => {
+          setIsPlayingMusic(true);
+        })
+        .catch(e => {
+          console.log('Audio playback blocked or failed:', e);
+          setIsPlayingMusic(false);
+        });
+    }
+  }, [currentTrack]);
+
+  useEffect(() => {
+    if (!bgMusicRef.current) return;
+    if (isPlayingMusic) {
+      bgMusicRef.current.volume = musicVolume;
+      bgMusicRef.current.play().catch(e => {
+        console.warn('Playback blocked by browser autoplay policy:', e);
+        setIsPlayingMusic(false);
+      });
+    } else {
+      bgMusicRef.current.pause();
+    }
+  }, [isPlayingMusic]);
 
   useEffect(() => {
     if (bgMusicRef.current) {
-      bgMusicRef.current.muted = isMuted;
-      if (!isMuted) {
-        bgMusicRef.current.play().catch(e => console.log('Audio play blocked:', e));
-      } else {
-        bgMusicRef.current.pause();
-      }
+      bgMusicRef.current.volume = musicVolume;
     }
-  }, [isMuted]);
+  }, [musicVolume]);
+
+  useEffect(() => {
+    return () => {
+      if (bgMusicRef.current) {
+        bgMusicRef.current.pause();
+        bgMusicRef.current = null;
+      }
+    };
+  }, []);
 
   // Dynamic color cycling for Prismatic Rainbow 3D dice!
   const [rainbowColor, setRainbowColor] = useState('#ff3366');
@@ -281,7 +375,6 @@ export default function App() {
         try {
           const targetHex = material === 'prismatic' ? rainbowColor : selectedMaterial.hex;
           result = await physicsDiceRef.current.roll(notation, targetHex, selectedMaterial.theme);
-          playDiceSound(isMuted);
         } catch (rollErr) {
           console.warn("3D physics roll failed, falling back to math:", rollErr);
           result = null;
@@ -421,6 +514,12 @@ export default function App() {
           setNarration(getNarrativeForRoll(rolledValue, sidesOfFirst));
         }
         setIsRolling(false);
+
+        if (rollData.isCriticalSuccess) {
+          triggerCriticalEffects();
+        } else if (rollData.isCriticalFailure) {
+          // Critical failure logic (if any)
+        }
       }, showDelay);
 
     } catch (err) {
@@ -459,7 +558,11 @@ export default function App() {
   return (
     <div 
       onClick={handleBackgroundClick}
-      className={cn("min-h-screen text-slate-200 font-sans overflow-hidden flex flex-col relative cursor-default transition-colors duration-1000", activeTint.bgClass)}
+      className={cn(
+        "min-h-screen text-slate-200 font-sans overflow-hidden flex flex-col relative cursor-default transition-colors duration-1000", 
+        activeTint.bgClass,
+        shouldShake && "animate-shake"
+      )}
     >
       {/* Mystical Background */}
       <div 
@@ -484,13 +587,6 @@ export default function App() {
         </div>
 
         <div className="flex items-center gap-4">
-          <button
-            onClick={() => setIsMuted(!isMuted)}
-            className="flex items-center justify-center w-12 h-12 bg-slate-900/60 border border-slate-700/50 hover:bg-slate-800 hover:border-slate-500 rounded-full text-slate-300 transition-all duration-300 backdrop-blur-md shadow-lg"
-            title={isMuted ? "Unmute Audio" : "Mute Audio"}
-          >
-            {isMuted ? <VolumeX className="w-5 h-5 text-slate-500" /> : <Volume2 className="w-5 h-5" />}
-          </button>
           <button 
             onClick={() => setIsSettingsOpen(true)}
             className="flex items-center justify-center w-12 h-12 bg-slate-900/60 border border-slate-700/50 hover:bg-slate-800 hover:border-slate-500 rounded-full text-slate-300 transition-all duration-300 backdrop-blur-md shadow-lg"
@@ -656,12 +752,45 @@ export default function App() {
                     {currentRoll.notation}
                   </div>
                   <div className={cn(
-                    "text-7xl font-serif font-bold drop-shadow-2xl",
-                    currentRoll.isCriticalSuccess ? "text-slate-100 drop-shadow-[0_0_15px_rgba(255,255,255,0.5)]" :
+                    "text-7xl font-serif font-bold drop-shadow-2xl relative",
+                    currentRoll.isCriticalSuccess ? "text-amber-400 drop-shadow-[0_0_15px_rgba(245,158,11,0.65)] font-extrabold" :
                     currentRoll.isCriticalFailure ? "text-red-500 drop-shadow-[0_0_15px_rgba(220,38,38,0.5)]" :
                     "text-slate-200"
                   )}>
                     {currentRoll.total}
+                    
+                    {/* Golden celebratory particles burst */}
+                    {particles.length > 0 && (
+                      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-50">
+                        {particles.map((p) => (
+                          <motion.div
+                            key={p.id}
+                            initial={{ x: 0, y: 0, scale: 1, opacity: 1, rotate: 0 }}
+                            animate={{
+                              x: Math.cos(p.angle) * p.speed * 32,
+                              y: Math.sin(p.angle) * p.speed * 32 + (p.duration * 20), // drift downwards (gravity)
+                              scale: [1, 1.4, 0],
+                              opacity: [1, 1, 0],
+                              rotate: p.angle * 180 / Math.PI + (Math.random() * 360),
+                            }}
+                            transition={{
+                              duration: p.duration,
+                              ease: "easeOut",
+                              delay: p.delay,
+                            }}
+                            style={{
+                              position: 'absolute',
+                              width: p.size,
+                              height: p.size,
+                              backgroundColor: p.color,
+                              borderRadius: Math.random() > 0.4 ? '50%' : '2px', // circles + confetti paper
+                              boxShadow: `0 0 10px ${p.color}, 0 0 4px rgba(255, 255, 255, 0.4)`,
+                              pointerEvents: 'none',
+                            }}
+                          />
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
                 
@@ -670,7 +799,10 @@ export default function App() {
                     {currentRoll.allDiceRolls.map((dieRoll, idx) => (
                       <div key={idx} className="flex items-center gap-1.5 bg-slate-950 px-2.5 py-1 rounded-lg border border-slate-850 shadow-sm animate-scale-in">
                         <DiceIcon type={dieRoll.type} material={material} className="w-3.5 h-3.5 text-slate-400" />
-                        <span className="font-mono text-xs font-bold text-slate-300">{dieRoll.value}</span>
+                        <span className={cn(
+                          "font-mono text-xs font-bold",
+                          dieRoll.value === 20 ? "text-amber-400 font-extrabold drop-shadow-[0_0_5px_rgba(245,158,11,0.6)] animate-pulse" : "text-slate-300"
+                        )}>{dieRoll.value}</span>
                       </div>
                     ))}
                   </div>
@@ -983,7 +1115,7 @@ export default function App() {
                       <div className="flex items-center gap-4">
                         <span className={cn(
                           "text-4xl font-serif font-bold",
-                          roll.isCriticalSuccess ? "text-slate-200 drop-shadow-md" :
+                          roll.isCriticalSuccess ? "text-amber-400 drop-shadow-[0_0_8px_rgba(245,158,11,0.5)] font-bold" :
                           roll.isCriticalFailure ? "text-red-500" :
                           "text-slate-300"
                         )}>
@@ -1159,6 +1291,116 @@ export default function App() {
                         </button>
                       )}
                     </div>
+                  </div>
+                </section>
+                {/* Bardic Music & Soundscapes */}
+                <section className="bg-slate-950/40 p-5 rounded-2xl border border-slate-800 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <Music className="w-5 h-5 text-slate-400 animate-pulse" />
+                      <h3 className="text-lg font-serif tracking-widest text-slate-300 uppercase">Bardic Soundscapes</h3>
+                    </div>
+                  </div>
+
+                  {/* Background Ambient Music Controller */}
+                  <div className="bg-slate-950/60 p-4 rounded-xl border border-slate-800/80 space-y-4">
+                    <div className="flex items-center justify-between">
+                      <span className="text-slate-200 text-xs font-serif font-bold uppercase tracking-wider block">Ambient Background Music</span>
+                      {isPlayingMusic && (
+                        <span className="flex h-2 w-2 relative">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                          <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Active Track Display & Play/Pause */}
+                    <div className="flex items-center justify-between bg-slate-950 p-3 rounded-xl border border-slate-800/40">
+                      <div className="flex flex-col min-w-0 flex-1 pr-3">
+                        <span className="text-[10px] text-slate-500 uppercase font-mono tracking-wider">Now Playing</span>
+                        <span className="text-xs font-serif text-slate-300 truncate font-bold">{currentTrack ? currentTrack.name : 'No track selected'}</span>
+                      </div>
+                      
+                      <button
+                        onClick={() => {
+                          if (currentTrack) setIsPlayingMusic(!isPlayingMusic);
+                        }}
+                        disabled={!currentTrack}
+                        className={cn(
+                          "p-2 rounded-full border transition-all duration-300",
+                          !currentTrack ? "bg-slate-950 text-slate-700 border-slate-900 cursor-not-allowed" :
+                          isPlayingMusic 
+                            ? "bg-amber-500 text-slate-950 border-transparent shadow-[0_0_10px_rgba(245,158,11,0.3)] hover:scale-105" 
+                            : "bg-slate-900 text-slate-400 border-slate-800 hover:text-slate-200"
+                        )}
+                        title={isPlayingMusic ? "Pause Ambience" : "Play Ambience"}
+                      >
+                        {isPlayingMusic ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+                      </button>
+                    </div>
+
+                    {/* Ambient Volume Control */}
+                    <div className="space-y-1.5">
+                      <div className="flex justify-between items-center text-[10px] uppercase tracking-wider font-serif text-slate-400">
+                        <span>Volume</span>
+                        <span className="font-mono">{Math.round(musicVolume * 100)}%</span>
+                      </div>
+                      <input 
+                        type="range"
+                        min="0"
+                        max="0.5"
+                        step="0.01"
+                        value={musicVolume}
+                        onChange={(e) => setMusicVolume(parseFloat(e.target.value))}
+                        className="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-amber-500"
+                      />
+                    </div>
+
+                    {/* Custom Player Tracks & File Uploader */}
+                    <div className="space-y-2">
+                      <div className="flex justify-between items-center">
+                        <span className="text-slate-400 font-serif uppercase tracking-wider text-[10px] block font-bold">Your Custom Tracks</span>
+                        <label className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-slate-900 hover:bg-slate-800 border border-slate-800 text-[10px] text-slate-300 font-serif cursor-pointer transition-colors">
+                          <Upload className="w-3.5 h-3.5 text-amber-400" />
+                          <span>Add Audio File</span>
+                          <input 
+                            type="file" 
+                            accept="audio/*,audio/flac,audio/wav,audio/ogg,audio/mp3" 
+                            multiple 
+                            onChange={handleFileUpload} 
+                            className="hidden" 
+                          />
+                        </label>
+                      </div>
+
+                      {customTracks.length === 0 ? (
+                        <p className="text-[10px] text-slate-600 font-serif italic text-center py-2 bg-slate-950/20 rounded-lg border border-dashed border-slate-900">
+                          No custom tracks loaded. Add your own MP3/WAV/OGG/FLAC files to play!
+                        </p>
+                      ) : (
+                        <div className="flex flex-col gap-1.5 max-h-[140px] overflow-y-auto pr-1 bg-slate-950/30 p-1.5 rounded-lg border border-slate-900">
+                          {customTracks.map(track => (
+                            <button
+                              key={track.id}
+                              onClick={() => {
+                                setCurrentTrack(track);
+                                setIsPlayingMusic(true);
+                              }}
+                              className={cn(
+                                "w-full text-left py-1.5 px-2 rounded-lg text-[11px] font-serif transition-all duration-200 border flex justify-between items-center truncate",
+                                currentTrack?.id === track.id
+                                  ? "bg-amber-500/20 text-amber-300 border-amber-500/30 font-bold"
+                                  : "text-slate-400 hover:text-slate-200 border-transparent hover:bg-slate-900/60"
+                              )}
+                            >
+                              <span className="truncate pr-2">{track.name}</span>
+                              {currentTrack?.id === track.id && <div className="w-1.5 h-1.5 bg-amber-400 rounded-full animate-ping" />}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
                   </div>
                 </section>
                 

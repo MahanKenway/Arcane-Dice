@@ -147,12 +147,15 @@ export function DiceIcon({ className, value, type, isRolling, material = 'slate'
           x="50"
           y={textY}
           textAnchor="middle"
-          fill={mat.stop1}
+          fill={value === 20 ? "#fbbf24" : mat.stop1}
           fontSize={fontSize}
-          stroke={mat.fill}
-          strokeWidth="1.5"
+          stroke={value === 20 ? "#78350f" : mat.fill}
+          strokeWidth={value === 20 ? "2" : "1.5"}
           paintOrder="stroke fill"
-          className="font-serif font-bold select-none drop-shadow-md"
+          className={cn(
+            "font-serif font-bold select-none drop-shadow-md",
+            value === 20 && "drop-shadow-[0_0_8px_rgba(251,191,36,0.8)]"
+          )}
         >
           {value}
         </text>
