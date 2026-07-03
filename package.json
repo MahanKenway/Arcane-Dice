@@ -11,7 +11,7 @@
     "lint": "tsc --noEmit"
   },
   "dependencies": {
-    "@3d-dice/dice-box": "^1.1.4",
+    "@3d-dice/dice-box": "^1.0.8",
     "@3d-dice/dice-themes": "^0.2.1",
     "@google/genai": "^2.4.0",
     "@tailwindcss/vite": "^4.1.14",

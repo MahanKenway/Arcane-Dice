@@ -34,15 +34,14 @@ export const PhysicsDice = forwardRef<PhysicsDiceRef, PhysicsDiceProps>((props, 
     if (!basePath.endsWith('/')) {
       basePath += '/';
     }
-    const assetPath = `${basePath}assets/`;
+    const assetPath = '/assets/';
     
     // Robust origin detection for sandboxed iframes
     const resolvedOrigin = window.location.origin === 'null' || !window.location.origin ? '' : window.location.origin;
     console.log('DiceBox Dynamic Asset Path:', assetPath, 'Origin:', resolvedOrigin);
 
     // Initialize the dice box
-    const box = new DiceBox({
-      container: '#physics-dice-box',
+    const box = new DiceBox('#physics-dice-box', {
       assetPath,
       origin: resolvedOrigin,
       theme: 'default',
