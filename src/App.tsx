@@ -38,8 +38,24 @@ import pixelChronoTowerBg from './assets/images/pixel_chrono_tower_1783180407728
 import pixelAlchemyLabBg from './assets/images/pixel_alchemy_lab_1783180420013.jpg';
 import pixelFeyCanopyBg from './assets/images/pixel_fey_canopy_1783180429708.jpg';
 import pixelMagmaCathedralBg from './assets/images/pixel_magma_cathedral_1783180439493.jpg';
+import pixelSkyTempleBg from './assets/images/pixel_sky_temple_1783180601864.jpg';
+import pixelCyberArcadeBg from './assets/images/pixel_cyber_arcade_1783180615252.jpg';
+import pixelCoralReefBg from './assets/images/pixel_coral_reef_1783180626749.jpg';
+import pixelNecroCryptBg from './assets/images/pixel_necro_crypt_1783180641646.jpg';
+import discoHarborTavernBg from './assets/images/disco_harbor_tavern_1783183913826.jpg';
+import discoRainyStreetBg from './assets/images/disco_rainy_street_1783183924346.jpg';
+import discoCoastalRuinsBg from './assets/images/disco_coastal_ruins_1783183935157.jpg';
+import discoDetectiveStudyBg from './assets/images/disco_detective_study_1783183945667.jpg';
 
 const BACKGROUNDS = [
+  { id: 'disco_harbor', name: 'Disco Harbor Tavern', url: discoHarborTavernBg },
+  { id: 'disco_street', name: 'Disco Rainy Street', url: discoRainyStreetBg },
+  { id: 'disco_ruins', name: 'Disco Coastal Ruins', url: discoCoastalRuinsBg },
+  { id: 'disco_study', name: 'Disco Detective Study', url: discoDetectiveStudyBg },
+  { id: 'sky_temple', name: 'Pixel Sky Temple', url: pixelSkyTempleBg },
+  { id: 'cyber_arcade', name: 'Pixel Cyberpunk Arcade', url: pixelCyberArcadeBg },
+  { id: 'coral_reef', name: 'Pixel Coral Sanctuary', url: pixelCoralReefBg },
+  { id: 'necro_crypt', name: 'Pixel Necro Crypt', url: pixelNecroCryptBg },
   { id: 'chrono_tower', name: 'Pixel Chrono Tower', url: pixelChronoTowerBg },
   { id: 'alchemy_lab', name: 'Pixel Alchemy Lab', url: pixelAlchemyLabBg },
   { id: 'fey_canopy', name: 'Pixel Feywood Canopy', url: pixelFeyCanopyBg },
