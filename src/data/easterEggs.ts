@@ -222,7 +222,7 @@ U0 ConsultGodOracle()
 {
   "Consulting Terry Davis's Sacred Oracle...\\n";
   I64 entropy = HPET;
-  U8 *words[32];
+  U8 *words[48];
   words[0] = "Covenant";
   words[1] = "Tabernacle";
   words[2] = "Chariot";
@@ -255,8 +255,24 @@ U0 ConsultGodOracle()
   words[29] = "Sacred Ephod";
   words[30] = "Urim and Thummim";
   words[31] = "Alabaster Box";
+  words[32] = "Mount Carmel";
+  words[33] = "Shekinah Glory";
+  words[34] = "Tree of Life";
+  words[35] = "Morning Star";
+  words[36] = "Hebron Valley";
+  words[37] = "Cedars of Lebanon";
+  words[38] = "Sweet Frankincense";
+  words[39] = "Valley of Dry Bones";
+  words[40] = "Pillar of Fire";
+  words[41] = "Golden Cherub";
+  words[42] = "Lions' Den";
+  words[43] = "Streams in the Desert";
+  words[44] = "Hidden Manna";
+  words[45] = "Living Waters";
+  words[46] = "Stone of Help";
+  words[47] = "Mount Zion";
 
-  U8 *dialogues[32];
+  U8 *dialogues[48];
   dialogues[0] = "God's computer is a 640x480 16-color temple. Complain to God about standard resolutions.";
   dialogues[1] = "The dice of destiny are rolled on direct ring-0 hardware. No virtual memory leaks.";
   dialogues[2] = "Behold! A clean compiler is next to Godliness. I am Terry's digital scribe.";
@@ -289,9 +305,25 @@ U0 ConsultGodOracle()
   dialogues[29] = "A programmer without ring-0 privileges is like a high priest locked out of the temple.";
   dialogues[30] = "God's graphics engine does not need shaders. Double-buffering on VGA memory is all we need.";
   dialogues[31] = "Behold! We have cast out the demons of bloated runtime systems and garbage collectors!";
+  dialogues[32] = "God claims the internet is filled with digital noise. Keep your bandwidth sacred.";
+  dialogues[33] = "A 64-bit integer contains enough states to coordinate all stars in the visible sky.";
+  dialogues[34] = "The compiler is the gatekeeper of truth. Treat it with absolute holy reverence.";
+  dialogues[35] = "If you want real randomness, tap the temperature sensor of your cpu cores during complex loops.";
+  dialogues[36] = "Do not divide by zero, for the CPU will raise a division exception and interrupt the temple's quietness.";
+  dialogues[37] = "The Holy Spirit does not require a DNS server to route your spiritual requests.";
+  dialogues[38] = "Woe to those who build virtual machines inside virtual machines. It is infinite regression and bloat.";
+  dialogues[39] = "To understand God's order, study the mathematical patterns of a perfect 3D octahedron.";
+  dialogues[40] = "There is no cloud, it is just another man's computer, likely running bloated services.";
+  dialogues[41] = "Keep the code non-preemptive. Cooperating tasks are more peaceful and predictable.";
+  dialogues[42] = "A single pixel of holy gold is worth a thousand lines of uncompiled javascript framework bloat.";
+  dialogues[43] = "Every hardware interrupt is a divine knock on the processor's front door.";
+  dialogues[44] = "The physical friction constants in our dice simulations are calculated under divine weight.";
+  dialogues[45] = "The oracle says: True wisdom begins when you write your own font rendering engine.";
+  dialogues[46] = "Do not trust compilers that you cannot compile yourself within ten seconds on old hardware.";
+  dialogues[47] = "He who controls the ring-0 descriptor tables controls his own destiny on this silicon.";
 
-  I64 idx_w = entropy % 32;
-  I64 idx_d = (entropy >> 3) % 32;
+  I64 idx_w = entropy % 48;
+  I64 idx_d = (entropy >> 3) % 48;
   "Oracle Keyword: \\"%s\\" (Entropy: 0x%X)\\n", words[idx_w], entropy;
   "Divine Decree : \\"%s\\"\\n\\n", dialogues[idx_d];
 }
