@@ -34,8 +34,16 @@ import pixelFrozenKeepBg from './assets/images/pixel_frozen_keep_1783176483703.j
 import pixelFloatingCitadelBg from './assets/images/pixel_floating_citadel_1783176494927.jpg';
 import pixelStarlightAirshipBg from './assets/images/pixel_starlight_airship_1783176509301.jpg';
 import pixelSunkenTempleBg from './assets/images/pixel_sunken_temple_1783176519790.jpg';
+import pixelChronoTowerBg from './assets/images/pixel_chrono_tower_1783180407728.jpg';
+import pixelAlchemyLabBg from './assets/images/pixel_alchemy_lab_1783180420013.jpg';
+import pixelFeyCanopyBg from './assets/images/pixel_fey_canopy_1783180429708.jpg';
+import pixelMagmaCathedralBg from './assets/images/pixel_magma_cathedral_1783180439493.jpg';
 
 const BACKGROUNDS = [
+  { id: 'chrono_tower', name: 'Pixel Chrono Tower', url: pixelChronoTowerBg },
+  { id: 'alchemy_lab', name: 'Pixel Alchemy Lab', url: pixelAlchemyLabBg },
+  { id: 'fey_canopy', name: 'Pixel Feywood Canopy', url: pixelFeyCanopyBg },
+  { id: 'magma_cathedral', name: 'Pixel Magma Cathedral', url: pixelMagmaCathedralBg },
   { id: 'underwater_ruins', name: 'Pixel Underwater Ruins', url: pixelUnderwaterRuinsBg },
   { id: 'desert_oasis', name: 'Pixel Desert Oasis', url: pixelDesertOasisBg },
   { id: 'haunted_mansion', name: 'Pixel Haunted Mansion', url: pixelHauntedMansionBg },
