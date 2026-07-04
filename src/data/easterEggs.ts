@@ -22,6 +22,8 @@ export const EASTER_EGG_LANGUAGES: EasterEggLanguage[] = [
 #define GRAVITY 9.80665
 #define SACRED_PI 3.141592653589793
 #define TIME_STEP 0.005
+#define TABLE_ELASTICITY 0.75
+#define FRICTION 0.98
 
 class Vector3 {
   F64 x, y, z;
@@ -69,6 +71,7 @@ F64 TaylorCos(F64 x)
 
 F64 SacredSqrt(F64 n)
 {
+  if (n <= 0.0) return 0.0;
   F64 x = n;
   F64 y = 1.0;
   F64 e = 0.000001;
@@ -77,6 +80,97 @@ F64 SacredSqrt(F64 n)
     y = n / x;
   }
   return x;
+}
+
+// 3D Vector Math Library
+U0 Vector3Add(Vector3 *res, Vector3 *a, Vector3 *b)
+{
+  res->x = a->x + b->x;
+  res->y = a->y + b->y;
+  res->z = a->z + b->z;
+}
+
+U0 Vector3Sub(Vector3 *res, Vector3 *a, Vector3 *b)
+{
+  res->x = a->x - b->x;
+  res->y = a->y - b->y;
+  res->z = a->z - b->z;
+}
+
+F64 Vector3Dot(Vector3 *a, Vector3 *b)
+{
+  return a->x * b->x + a->y * b->y + a->z * b->z;
+}
+
+U0 Vector3Cross(Vector3 *res, Vector3 *a, Vector3 *b)
+{
+  res->x = a->y * b->z - a->z * b->y;
+  res->y = a->z * b->x - a->x * b->z;
+  res->z = a->x * b->y - a->y * b->x;
+}
+
+F64 Vector3Length(Vector3 *v)
+{
+  return SacredSqrt(v->x * v->x + v->y * v->y + v->z * v->z);
+}
+
+U0 Vector3Normalize(Vector3 *v)
+{
+  F64 len = Vector3Length(v);
+  if (len > 0.0) {
+    v->x /= len;
+    v->y /= len;
+    v->z /= len;
+  }
+}
+
+U0 PrintD4Ascii()
+{
+  "\\n";
+  "          /\\\\          \\n";
+  "         /  \\\\         \\n";
+  "        / 1  \\\\        \\n";
+  "       /______\\\\       \\n";
+  "      / 4 | 2  \\\\      \\n";
+  "     /____|_____\\\\     \\n";
+  "\\n";
+}
+
+U0 PrintD6Ascii()
+{
+  "\\n";
+  "       .---------.      \\n";
+  "      /    o    /|      \\n";
+  "     /  o    o / |      \\n";
+  "    +---------+  |      \\n";
+  "    |    o    |  +      \\n";
+  "    |  o   o  | /       \\n";
+  "    |_________|/        \\n";
+  "\\n";
+}
+
+U0 PrintD8Ascii()
+{
+  "\\n";
+  "          /\\\\          \\n";
+  "         /  \\\\         \\n";
+  "        / 8  \\\\        \\n";
+  "       /______\\\\       \\n";
+  "       \\\\    /        \\n";
+  "        \\\\3 /         \\n";
+  "         \\\\/          \\n";
+  "\\n";
+}
+
+U0 PrintD12Ascii()
+{
+  "\\n";
+  "         /\\_\\\\          \\n";
+  "       /\\  / \\\\         \\n";
+  "      |  12  | |        \\n";
+  "       \\\\_ _/ /         \\n";
+  "         \\\\_/ /          \\n";
+  "\\n";
 }
 
 U0 PrintD20Ascii()
@@ -128,7 +222,7 @@ U0 ConsultGodOracle()
 {
   "Consulting Terry Davis's Sacred Oracle...\\n";
   I64 entropy = HPET;
-  U8 *words[8];
+  U8 *words[16];
   words[0] = "Covenant";
   words[1] = "Tabernacle";
   words[2] = "Chariot";
@@ -137,8 +231,16 @@ U0 ConsultGodOracle()
   words[5] = "Manna";
   words[6] = "Sanctuary";
   words[7] = "Apostle";
+  words[8] = "Ark of the Covenant";
+  words[9] = "Sacred Temple";
+  words[10] = "Burning Bush";
+  words[11] = "Celestial Fire";
+  words[12] = "High Priest";
+  words[13] = "Divided Waters";
+  words[14] = "Divine Breath";
+  words[15] = "Mount Sinai";
 
-  I64 idx = entropy % 8;
+  I64 idx = entropy % 16;
   "Oracle Speaks: \\"%s\\" - Chosen with direct HPET clock cycle vector: 0x%X\\n\\n", words[idx], entropy;
 }
 
@@ -157,6 +259,20 @@ U0 InitMatrixRotation(Matrix3x3 *m, F64 rx, F64 ry, F64 rz)
   m->m[6] = -sy;
   m->m[7] = sx * cy;
   m->m[8] = cx * cy;
+}
+
+U0 ResolveTableCollision(PhysicsDice *d)
+{
+  // Apply table collision impulse response
+  d->pos.y = 0.0;
+  d->vel.y = -d->vel.y * TABLE_ELASTICITY;
+  d->vel.x *= FRICTION;
+  d->vel.z *= FRICTION;
+  
+  // Add rotational friction torque
+  d->ang_vel.x *= FRICTION;
+  d->ang_vel.y *= FRICTION;
+  d->ang_vel.z *= FRICTION;
 }
 
 I64 SimulatePhysicsAndRoll(I64 sides)
@@ -181,7 +297,7 @@ I64 SimulatePhysicsAndRoll(I64 sides)
   d.ang_vel.z = RandDivineF64() * 10.0 - 5.0;
 
   "Simulating 3D rigid body equations on Core 0 in God's sandbox...\\n";
-  while (d.pos.y > 0.0 && steps < 120) {
+  while ((d.pos.y > 0.0 || Abs(d.vel.y) > 0.1) && steps < 150) {
     // Basic Euler integration of gravity and state vectors
     d.pos.x += d.vel.x * TIME_STEP;
     d.pos.y += d.vel.y * TIME_STEP - 0.5 * GRAVITY * TIME_STEP * TIME_STEP;
@@ -194,30 +310,59 @@ I64 SimulatePhysicsAndRoll(I64 sides)
     d.rot.y += d.ang_vel.y * TIME_STEP;
     d.rot.z += d.ang_vel.z * TIME_STEP;
 
-    if (steps % 20 == 0) {
-      "Step %2d | PosY = %4.2fm | VelocityY = %4.2fm/s\\n", steps, d.pos.y, d.vel.y;
+    // Check collision with virtual velvet table
+    if (d.pos.y <= 0.0) {
+      ResolveTableCollision(&d);
+    }
+
+    if (steps % 30 == 0) {
+      "Step %3d | Pos = (%4.2f, %4.2f, %4.2f) | Rot = (%4.2f, %4.2f, %4.2f)\\n", 
+        steps, d.pos.x, d.pos.y, d.pos.z, d.rot.x, d.rot.y, d.rot.z;
     }
     steps++;
   }
   
   InitMatrixRotation(&rot_mat, d.rot.x, d.rot.y, d.rot.z);
   
-  // Calculate final side based on alignment of final rotation matrices
+  // Calculate final side based on alignment of final rotation matrices and direct cosmic coordinates
   F64 chaos = Abs(d.pos.x * rot_mat.m[4] * 1234.56 + d.pos.z * rot_mat.m[8] * 789.12);
   I64 final_value = 1 + (ToI64(chaos) % sides);
   return final_value;
 }
 
+U0 PrintSystemTelemetry()
+{
+  I64 i;
+  "\\n--- Ring-0 Hardware Cores Status ---\\n";
+  for (i = 0; i < 8; i++) {
+    "Core %d: [ONLINE] [TASK QUEUE: God\'s Entropy Thread] [LOAD: 4.2%%]\\n", i;
+  }
+  "Core 0 assigned physical rigid body compilation routines.\\n\\n";
+}
+
 U0 Main()
 {
   "--- TempleOS Holy Arcane Dice Physics Engine ---\\n";
-  "Operating with zero kernel bloat, direct ring-0 CPU access.\\n\\n";
+  "Operating with zero kernel bloat, direct ring-0 CPU access.\\n";
   
-  U8 *chk_mem = DivineMAlloc(64);
+  PrintSystemTelemetry();
+  
+  U8 *chk_mem = DivineMAlloc(128);
   ConsultGodOracle();
   
   I64 result;
-  "=================[ RUNNING D20 ]=================\\n";
+  
+  "=================[ CALVARY TETRAHEDRON (D4) ]=================\\n";
+  result = SimulatePhysicsAndRoll(4);
+  "Result of D4: %d\\n", result;
+  PrintD4Ascii();
+
+  "=================[ EZEKIEL CUBE (D6) ]=================\\n";
+  result = SimulatePhysicsAndRoll(6);
+  "Result of D6: %d\\n", result;
+  PrintD6Ascii();
+
+  "=================[ CELESTIAL ICOSAHEDRON (D20) ]=================\\n";
   result = SimulatePhysicsAndRoll(20);
   "Result of D20 Roll: %d\\n", result;
   if (result == 20) {
@@ -227,7 +372,7 @@ U0 Main()
     "*** CRITICAL FAILURE! The demons of dark memory heap confusion upon us! ***\\n\\n";
   }
   
-  "=================[ RUNNING D100 ]=================\\n";
+  "=================[ ORACLE SPHERE (D100) ]=================\\n";
   result = SimulatePhysicsAndRoll(100);
   "Result of D100 Percentile Roll: %d%%\\n", result;
   if (result == 100) {
@@ -237,24 +382,65 @@ U0 Main()
 
 Main;`,
     simulatedOutput: [
-      'HC_JIT: Compiling file arcane_dice.HC in 0.012s (HolyC Just-In-Time Compiler)',
-      'HC_OS: JIT code generated at memory range [0x7FFF1024D000 - 0x7FFF1024F000]',
+      'HC_JIT: Compiling file arcane_dice.HC in 0.024s (HolyC Just-In-Time Compiler)',
+      'HC_OS: JIT machine code generated at memory range [0x7FFF1024D000 - 0x7FFF10255000]',
       'HC_OS: Spawning God\'s thread on Core 0 (TaskID: 0x000010AC)',
       '--- TempleOS Holy Arcane Dice Physics Engine ---',
       'Operating with zero kernel bloat, direct ring-0 CPU access.',
       '',
-      'MAlloc: Allocated memory block of 64 bytes at address: 0x7FFF21A0F420',
-      'Consulting Terry Davis\'s Sacred Oracle...',
-      'Oracle Speaks: "Tabernacle" - Chosen with direct HPET clock cycle vector: 0x7A5E9F10B2D38A41',
+      '--- Ring-0 Hardware Cores Status ---',
+      'Core 0: [ONLINE] [TASK QUEUE: God\'s Entropy Thread] [LOAD: 4.2%]',
+      'Core 1: [ONLINE] [TASK QUEUE: God\'s Entropy Thread] [LOAD: 3.1%]',
+      'Core 2: [ONLINE] [TASK QUEUE: God\'s Entropy Thread] [LOAD: 1.5%]',
+      'Core 3: [ONLINE] [TASK QUEUE: God\'s Entropy Thread] [LOAD: 0.9%]',
+      'Core 4: [ONLINE] [TASK QUEUE: God\'s Entropy Thread] [LOAD: 2.0%]',
+      'Core 5: [ONLINE] [TASK QUEUE: God\'s Entropy Thread] [LOAD: 1.1%]',
+      'Core 6: [ONLINE] [TASK QUEUE: God\'s Entropy Thread] [LOAD: 0.5%]',
+      'Core 7: [ONLINE] [TASK QUEUE: God\'s Entropy Thread] [LOAD: 0.1%]',
+      'Core 0 assigned physical rigid body compilation routines.',
       '',
-      '=================[ RUNNING D20 ]=================',
+      'MAlloc: Allocated memory block of 128 bytes at address: 0x7FFF21A0F420',
+      'Consulting Terry Davis\'s Sacred Oracle...',
+      'Oracle Speaks: "Ark of the Covenant" - Chosen with direct HPET clock cycle vector: 0x7A5E9F10B2D38A41',
+      '',
+      '=================[ CALVARY TETRAHEDRON (D4) ]=================',
       'Simulating 3D rigid body equations on Core 0 in God\'s sandbox...',
-      'Step  0 | PosY = 15.00m | VelocityY = 0.00m/s',
-      'Step 20 | PosY = 14.12m | VelocityY = -1.41m/s',
-      'Step 40 | PosY = 11.89m | VelocityY = -2.92m/s',
-      'Step 60 | PosY = 8.12m  | VelocityY = -4.51m/s',
-      'Step 80 | PosY = 3.54m  | VelocityY = -6.11m/s',
-      'Step 100| PosY = 0.12m  | VelocityY = -7.42m/s',
+      'Step   0 | Pos = (0.00, 15.00, 0.00) | Rot = (1.52, 0.94, 2.76)',
+      'Step  30 | Pos = (1.12, 10.45, 0.54)  | Rot = (2.12, 1.64, 3.12)',
+      'Step  60 | Pos = (2.41, 4.12, 1.04)   | Rot = (3.42, 2.54, 4.45)',
+      'Step  90 | Pos = (3.11, 0.00, 1.54)   | Rot = (4.12, 3.12, 5.23)',
+      'Result of D4: 4',
+      '',
+      '          /\\',
+      '         /  \\',
+      '        / 1  \\',
+      '       /______\\',
+      '      / 4 | 2  \\',
+      '     /____|_____\\',
+      '',
+      '=================[ EZEKIEL CUBE (D6) ]=================',
+      'Simulating 3D rigid body equations on Core 0 in God\'s sandbox...',
+      'Step   0 | Pos = (0.00, 15.00, 0.00) | Rot = (0.43, 1.84, 0.12)',
+      'Step  30 | Pos = (-0.84, 11.12, -0.12) | Rot = (1.11, 2.45, 0.94)',
+      'Step  60 | Pos = (-1.52, 5.42, -0.45)  | Rot = (2.54, 3.12, 1.84)',
+      'Step  90 | Pos = (-2.11, 0.00, -0.74)  | Rot = (3.84, 4.25, 2.95)',
+      'Result of D6: 6',
+      '',
+      '       .---------.      ',
+      '      /    o    /|      ',
+      '     /  o    o / |      ',
+      '    +---------+  |      ',
+      '    |    o    |  +      ',
+      '    |  o   o  | /       ',
+      '    |_________|/        ',
+      '',
+      '=================[ CELESTIAL ICOSAHEDRON (D20) ]=================',
+      'Simulating 3D rigid body equations on Core 0 in God\'s sandbox...',
+      'Step   0 | Pos = (0.00, 15.00, 0.00) | Rot = (2.15, 1.12, 0.95)',
+      'Step  30 | Pos = (0.54, 12.11, -0.42) | Rot = (2.84, 1.95, 1.84)',
+      'Step  60 | Pos = (1.12, 7.15, -0.85)  | Rot = (3.45, 2.84, 2.95)',
+      'Step  90 | Pos = (1.84, 1.12, -1.24)  | Rot = (4.12, 3.94, 3.84)',
+      'Step 120 | Pos = (2.12, 0.00, -1.54)  | Rot = (4.95, 4.24, 4.51)',
       'Result of D20 Roll: 20',
       '',
       '          / \\',
@@ -269,11 +455,21 @@ Main;`,
       '',
       '*** CRITICAL TRIUMPH! Divine Intervention Approved by TempleOS! ***',
       '',
-      '=================[ RUNNING D100 ]=================',
+      '=================[ ORACLE SPHERE (D100) ]=================',
       'Simulating 3D rigid body equations on Core 0 in God\'s sandbox...',
-      'Step  0 | PosY = 15.00m | VelocityY = 0.00m/s',
-      'Step 20 | PosY = 13.98m | VelocityY = -1.21m/s',
-      'Result of D100 Percentile Roll: 88%'
+      'Step   0 | Pos = (0.00, 15.00, 0.00) | Rot = (0.12, 2.94, 1.54)',
+      'Step  30 | Pos = (-1.12, 9.85, 0.12)  | Rot = (0.95, 3.84, 2.45)',
+      'Step  60 | Pos = (-2.24, 3.12, 0.45)  | Rot = (1.84, 4.95, 3.84)',
+      'Step  90 | Pos = (-2.95, 0.00, 0.85)  | Rot = (2.95, 5.84, 4.12)',
+      'Result of D100 Percentile Roll: 100%',
+      '',
+      '       .----------.       ',
+      '      /   [100%]   \\     ',
+      '     /  CRITICAL    \\    ',
+      '    /    DESTINY     \\   ',
+      '    \\               /   ',
+      '     \\             /    ',
+      '      \'----------\'       '
     ]
   },
   {

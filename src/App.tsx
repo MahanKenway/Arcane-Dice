@@ -28,6 +28,12 @@ import pixelCursedSwampBg from './assets/images/pixel_cursed_swamp_1782919880602
 import pixelDesertOasisBg from './assets/images/pixel_desert_oasis_1782919880602_1782920361362.jpg';
 import pixelHauntedMansionBg from './assets/images/pixel_haunted_mansion_1782919880602_1782920377130.jpg';
 import pixelUnderwaterRuinsBg from './assets/images/pixel_underwater_ruins_1782921053773.jpg';
+import pixelAbyssalDepthsBg from './assets/images/pixel_abyssal_depths_1783176460827.jpg';
+import pixelDesertScorchingBg from './assets/images/pixel_desert_scorching_1783176472880.jpg';
+import pixelFrozenKeepBg from './assets/images/pixel_frozen_keep_1783176483703.jpg';
+import pixelFloatingCitadelBg from './assets/images/pixel_floating_citadel_1783176494927.jpg';
+import pixelStarlightAirshipBg from './assets/images/pixel_starlight_airship_1783176509301.jpg';
+import pixelSunkenTempleBg from './assets/images/pixel_sunken_temple_1783176519790.jpg';
 
 const BACKGROUNDS = [
   { id: 'underwater_ruins', name: 'Pixel Underwater Ruins', url: pixelUnderwaterRuinsBg },
@@ -49,12 +55,12 @@ const BACKGROUNDS = [
   { id: 'neon', name: 'Cyberpunk Neon Sanctum', url: cyberNeonBg },
   { id: 'forest', name: 'Elven Dark Forest', url: darkForestBg },
   { id: 'underdark', name: 'Glowing Underdark Caverns', url: underdarkBg },
-  { id: 'abyss', name: 'Abyssal Depths', url: 'https://images.unsplash.com/photo-1551244072-5d12893278ab?q=80&w=2600&auto=format&fit=crop' },
-  { id: 'desert', name: 'Scorching Sands', url: 'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?q=80&w=2600&auto=format&fit=crop' },
-  { id: 'frozen', name: 'Frozen Keep', url: 'https://images.unsplash.com/photo-1542856391-010fb87dcfed?q=80&w=2600&auto=format&fit=crop' },
-  { id: 'citadel', name: 'Floating Citadel', url: 'https://images.unsplash.com/photo-1508739773434-c26b3d09e071?q=80&w=2600&auto=format&fit=crop' },
-  { id: 'ship', name: 'Starlight Airship', url: 'https://images.unsplash.com/photo-1511447333015-45b65e60f6d5?q=80&w=2600&auto=format&fit=crop' },
-  { id: 'temple', name: 'Sunken Temple', url: 'https://images.unsplash.com/photo-1541018939203-26ee57db2f75?q=80&w=2600&auto=format&fit=crop' }
+  { id: 'abyss', name: 'Pixel Abyssal Depths', url: pixelAbyssalDepthsBg },
+  { id: 'desert', name: 'Pixel Scorching Sands', url: pixelDesertScorchingBg },
+  { id: 'frozen', name: 'Pixel Frozen Keep', url: pixelFrozenKeepBg },
+  { id: 'citadel', name: 'Pixel Floating Citadel', url: pixelFloatingCitadelBg },
+  { id: 'ship', name: 'Pixel Starlight Airship', url: pixelStarlightAirshipBg },
+  { id: 'temple', name: 'Pixel Sunken Temple', url: pixelSunkenTempleBg }
 ];
 
 const BACKGROUND_TINTS = [
