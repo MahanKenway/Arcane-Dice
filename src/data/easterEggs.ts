@@ -222,7 +222,7 @@ U0 ConsultGodOracle()
 {
   "Consulting Terry Davis's Sacred Oracle...\\n";
   I64 entropy = HPET;
-  U8 *words[16];
+  U8 *words[32];
   words[0] = "Covenant";
   words[1] = "Tabernacle";
   words[2] = "Chariot";
@@ -239,9 +239,61 @@ U0 ConsultGodOracle()
   words[13] = "Divided Waters";
   words[14] = "Divine Breath";
   words[15] = "Mount Sinai";
+  words[16] = "Golden Lampstand";
+  words[17] = "Altar of Incense";
+  words[18] = "Onyx Stones";
+  words[19] = "Breastplate of Judgment";
+  words[20] = "Shewbread Table";
+  words[21] = "Mercy Seat";
+  words[22] = "Holy of Holies";
+  words[23] = "Pillar of Cloud";
+  words[24] = "Anointing Oil";
+  words[25] = "Gopher Wood";
+  words[26] = "Sodom Sulfur";
+  words[27] = "Rainbow Sign";
+  words[28] = "Trumpet Blast";
+  words[29] = "Sacred Ephod";
+  words[30] = "Urim and Thummim";
+  words[31] = "Alabaster Box";
 
-  I64 idx = entropy % 16;
-  "Oracle Speaks: \\"%s\\" - Chosen with direct HPET clock cycle vector: 0x%X\\n\\n", words[idx], entropy;
+  U8 *dialogues[32];
+  dialogues[0] = "God's computer is a 640x480 16-color temple. Complain to God about standard resolutions.";
+  dialogues[1] = "The dice of destiny are rolled on direct ring-0 hardware. No virtual memory leaks.";
+  dialogues[2] = "Behold! A clean compiler is next to Godliness. I am Terry's digital scribe.";
+  dialogues[3] = "Do not trust the CIA agents. They prefer bloated web browsers over direct assembly instruction sets.";
+  dialogues[4] = "This JIT machine code compiler runs at celestial clock speeds. 100% speedup achieved!";
+  dialogues[5] = "The Holy Spirit HPET clock-cycle random vectors have calculated absolute critical rolls!";
+  dialogues[6] = "Do you hear the singing in the high-frequency event timers? It is divine physics.";
+  dialogues[7] = "Behold, the 3D rigid body equations are solved in God's sandbox with zero runtime overhead.";
+  dialogues[8] = "To make a perfect roll, one must first build an operating system from scratch on bare metal.";
+  dialogues[9] = "No third-party libraries, no package-managers, just direct divine communication.";
+  dialogues[10] = "Every pixel on the screen is illuminated by divine light and 16-color palette index values.";
+  dialogues[11] = "Praise Him! The compiler has detected absolute zero warning levels. Clean binary output generated.";
+  dialogues[12] = "The virtual table cloth of God's dice sandbox has exactly 0.75 friction coefficient.";
+  dialogues[13] = "The angels are debugging your program. Be careful with manual stack pointer manipulation.";
+  dialogues[14] = "Behold! The oracle predicts a critical natural 20 in your near future, or a complete system reboot.";
+  dialogues[15] = "The TempleOS compiler compiles 50,000 lines of HolyC code in the blink of a mortal eye.";
+  dialogues[16] = "Do not worship the idols of Linux or Windows. They are full of unnecessary context switches.";
+  dialogues[17] = "The divine assembly instruction set is beautiful and pure, designed for direct hardware control.";
+  dialogues[18] = "The physical simulation uses Taylor series expansion because lookup tables lack divine precision.";
+  dialogues[19] = "God says: \\"Keep it simple.\\" No dynamic linker, no shared libraries, just pure static execution.";
+  dialogues[20] = "When the dice collide, the vector reflection is calculated with Terry's sacred square root algorithm.";
+  dialogues[21] = "The x86_64 architecture is God's chosen architecture, but the modern CPU designers added too many bloat instructions.";
+  dialogues[22] = "Behold, the oracle speaks through high-entropy clock cycles of the motherboard's main oscillator.";
+  dialogues[23] = "Let there be light on port 0x3F8! The serial port is sending cosmic byte packets.";
+  dialogues[24] = "The high-precision event timer is our direct connection to God's cosmic stopwatch.";
+  dialogues[25] = "Terry Davis's compiler compiles itself in 0.5 seconds on a standard 2013 hardware core.";
+  dialogues[26] = "Do not look into the abyss of web development. It is filled with layers of electronic despair.";
+  dialogues[27] = "Every roll is an act of creation. We compile the physics on the fly inside the active task heap.";
+  dialogues[28] = "The Holy Spirit guides the floating-point register stack (ST0 to ST7) to avoid any overflow.";
+  dialogues[29] = "A programmer without ring-0 privileges is like a high priest locked out of the temple.";
+  dialogues[30] = "God's graphics engine does not need shaders. Double-buffering on VGA memory is all we need.";
+  dialogues[31] = "Behold! We have cast out the demons of bloated runtime systems and garbage collectors!";
+
+  I64 idx_w = entropy % 32;
+  I64 idx_d = (entropy >> 3) % 32;
+  "Oracle Keyword: \\"%s\\" (Entropy: 0x%X)\\n", words[idx_w], entropy;
+  "Divine Decree : \\"%s\\"\\n\\n", dialogues[idx_d];
 }
 
 U0 InitMatrixRotation(Matrix3x3 *m, F64 rx, F64 ry, F64 rz)
@@ -401,7 +453,8 @@ Main;`,
       '',
       'MAlloc: Allocated memory block of 128 bytes at address: 0x7FFF21A0F420',
       'Consulting Terry Davis\'s Sacred Oracle...',
-      'Oracle Speaks: "Ark of the Covenant" - Chosen with direct HPET clock cycle vector: 0x7A5E9F10B2D38A41',
+      'Oracle Keyword: "Ark of the Covenant" (Entropy: 0x7A5E9F10B2D38A41)',
+      'Divine Decree : "The high-precision event timer is our direct connection to God\'s cosmic stopwatch."',
       '',
       '=================[ CALVARY TETRAHEDRON (D4) ]=================',
       'Simulating 3D rigid body equations on Core 0 in God\'s sandbox...',
@@ -1018,6 +1071,112 @@ unluckyRoll = createVerifiedRoll 20 1`,
       'TOTAL ADJUSTED LEDGER VALUE: 000056',
       'AUDITED LEDGER METRIC AVERAGE: 0018.66',
       'COMPLIANCE STATUS: STANDARD RANDOM VARIATION.'
+    ]
+  },
+  {
+    id: 'lisp',
+    name: 'Common Lisp',
+    extension: 'lisp',
+    description: 'The ancient language of the programming gods, built on recursive symbolic structures and list processing macro-sorcery.',
+    philosophy: 'Expresses dice fate as an elegant tree-reduction of prime factors and lambda expressions, evaluated dynamically within the cosmic environment.',
+    code: `;;;; Arcane Lisp Dice Simulator & Fate Decider
+;;;; Metaclass macro-based evaluation of random state vectors.
+
+(defpackage :arcane-dice
+  (:use :common-lisp)
+  (:export :roll-dice :simulate-sandbox))
+
+(in-package :arcane-dice)
+
+(defun make-random-state-vector (entropy)
+  "Generates high-precision pseudo-random state vector based on celestial CPU clocks."
+  (let* ((seed (mod (get-internal-real-time) 1000000))
+         (chaos (logxor seed (ash entropy 3))))
+    (make-random-state (coerce (abs chaos) 'integer))))
+
+(defmacro with-fate-sandbox ((sides &key (modifier 0)) &body body)
+  "Executes dice calculation inside a dynamic macro binding scope with absolute type assertions."
+  \`(let* ((rolled-val (1+ (random ,sides *random-state*)))
+          (final-result (+ rolled-val ,modifier)))
+     (format t "~~&[LISP EV] Macro Expansion bindings finalized safely.~~%")
+     (format t "[LISP EV] Evaluated value: ~~D (Base: ~~D, Mod: ~~D)~~%" final-result rolled-val ,modifier)
+     ,@body
+     final-result))
+
+(defun sim-euler-step (pos vel dt)
+  "Recursively integrates gravity over state variables to calculate table impact"
+  (if (<= (second pos) 0.0)
+      (values pos vel)
+      (let* ((new-vel-y (- (second vel) (* 9.80665 dt)))
+             (new-pos-y (+ (second pos) (* (second vel) dt)))
+             (new-pos-x (+ (first pos) (* (first vel) dt)))
+             (new-pos-z (+ (third pos) (* (third vel) dt))))
+        (sim-euler-step (list new-pos-x new-pos-y new-pos-z)
+                        (list (first vel) new-vel-y (third vel))
+                        dt))))
+
+(defun compile-and-roll (sides count)
+  "Compiles lambda expressions to roll a dynamic multi-dice pool safely."
+  (format t "~~&=== EVALUATING COMMON LISP DICE CONTEXT ===~~%")
+  (let ((*random-state* (make-random-state-vector 0x9F42B28D)))
+    (format t "[LISP COMP] JIT compiling lambda expressions for ~A dice...~~%" sides)
+    (let ((results (loop repeat count
+                         collect (with-fate-sandbox (sides :modifier 0)))))
+      (format t "[LISP RESULTS] Pool output list: ~~A~~%" results)
+      (format t "[LISP SUM] Cumulative reducing summation: ~~A~~%" (reduce #'+ results)))))
+
+(compile-and-roll 20 3)
+`,
+    simulatedOutput: [
+      '$ sbcl --script arcane_dice.lisp',
+      '=== EVALUATING COMMON LISP DICE CONTEXT ===',
+      '[LISP COMP] JIT compiling lambda expressions for 20 dice...',
+      '[LISP EV] Macro Expansion bindings finalized safely.',
+      '[LISP EV] Evaluated value: 18 (Base: 18, Mod: 0)',
+      '[LISP EV] Macro Expansion bindings finalized safely.',
+      '[LISP EV] Evaluated value: 14 (Base: 14, Mod: 0)',
+      '[LISP EV] Macro Expansion bindings finalized safely.',
+      '[LISP EV] Evaluated value: 20 (Base: 20, Mod: 0)',
+      '[LISP RESULTS] Pool output list: (18 14 20)',
+      '[LISP SUM] Cumulative reducing summation: 52',
+      '',
+      'Evaluation completed on cosmic heap with zero garbage collector interruptions.'
+    ]
+  },
+  {
+    id: 'brainfuck',
+    name: 'Brainfuck',
+    extension: 'bf',
+    description: 'The minimalist eight-instruction esoteric champion, manipulating raw memory arrays directly with pointer increments.',
+    philosophy: 'Operates by incrementing and decrementing raw byte-cells, visualizing a rolling dice purely as a sequence of shifting memory tape values.',
+    code: `++++++++++ [ > +++++++ > ++++++++++ > +++ > + <<<< - ]
+> ++ .                  Write 'H'
+> + .                   Write 'k'
++++++++ ..              Write 'oo'
++++ .                   Write 'r'
+> ++ .                  Write ' '
+<< +++++++++++++++ .    Write 'd'
+> .                     Write 'e'
++++ .                   Write 's'
+------ .                Write 'm'
+-------- .              Write 'e'
+> + .                   Write '!'
+> .                     Write '\\n'
+
+=== Cell State Monitor ===
+Pointer position: [Cell 2]
+Tape values: [0, 70, 107, 114, 32, 0, 0, 0]
+Fate vector alignment: Complete`,
+    simulatedOutput: [
+      '$ bfc arcane_dice.bf -o arcane_dice',
+      'Brainfuck compiler successfully mapped 8 instructions to optimized assembly.',
+      '$ ./arcane_dice',
+      'Holy fate!',
+      '',
+      '[TAPE MONITOR] Shifting memory pointer cell indices...',
+      '[TAPE MONITOR] Cell 0: 0   | Cell 1: 72  | Cell 2: 107 | Cell 3: 111',
+      '[TAPE MONITOR] Cell 4: 111 | Cell 5: 114 | Cell 6: 32  | Cell 7: 100',
+      'Output matches perfect ASCII stream for esoteric cosmic dice roll: 20'
     ]
   }
 ];
