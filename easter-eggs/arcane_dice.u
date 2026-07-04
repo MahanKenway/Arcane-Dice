@@ -1,0 +1,7 @@
+-- Unison Content-Addressed Distributed Dice Roller
+-- Under the hood, this function hash-identifies as unique distributed logic
+
+arcaneDice.roll : Nat -> {Random} Nat
+arcaneDice.roll sides =
+  val = Random.nat
+  (val mod sides) + 1

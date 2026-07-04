@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { History, Dices, RotateCcw, Plus, Minus, Settings2, X, Palette, Image as ImageIcon, TrendingUp, TrendingDown, Sparkles, Music, Play, Pause, Upload , SkipBack, SkipForward, Volume2 } from 'lucide-react';
+import { History, Dices, RotateCcw, Plus, Minus, Settings2, X, Palette, Image as ImageIcon, TrendingUp, TrendingDown, Sparkles, Music, Play, Pause, Upload, Trash2, SkipBack, SkipForward, Volume2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from './utils';
 import { RollResult, DiceType } from './gameLogic';
@@ -128,8 +128,81 @@ export default function App() {
   const [selectedPool, setSelectedPool] = useState<Record<DiceType, number>>({});
   const [lastRollWasPool, setLastRollWasPool] = useState(false);
   
-  // Randomly select background and material on load
-  const [bgImage, setBgImage] = useState(() => BACKGROUNDS[Math.floor(Math.random() * BACKGROUNDS.length)].url);
+  interface CustomBg {
+    id: string;
+    name: string;
+    url: string;
+  }
+
+  // Select background from localStorage, or randomly on load
+  const [bgImage, setBgImage] = useState(() => {
+    const saved = localStorage.getItem('arcane_dice_bg_image');
+    if (saved) return saved;
+    return BACKGROUNDS[Math.floor(Math.random() * BACKGROUNDS.length)].url;
+  });
+
+  const [customBgs, setCustomBgs] = useState<CustomBg[]>(() => {
+    try {
+      const saved = localStorage.getItem('arcane_dice_custom_bgs');
+      return saved ? JSON.parse(saved) : [];
+    } catch (e) {
+      console.error("Failed to parse custom backgrounds", e);
+      return [];
+    }
+  });
+
+  const handleBgUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      alert('لطفا یک فایل تصویر یا گیف معتبر انتخاب کنید.');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const dataUrl = event.target?.result as string;
+      
+      const newBg: CustomBg = {
+        id: `custom_${Date.now()}`,
+        name: file.name.substring(0, file.name.lastIndexOf('.')) || file.name,
+        url: dataUrl
+      };
+
+      const updated = [newBg, ...customBgs];
+      setCustomBgs(updated);
+      setBgImage(newBg.url);
+      localStorage.setItem('arcane_dice_bg_image', newBg.url);
+
+      try {
+        localStorage.setItem('arcane_dice_custom_bgs', JSON.stringify(updated));
+      } catch (err) {
+        console.warn("Storage quota exceeded, keeping in memory for this session", err);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleDeleteCustomBg = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const updated = customBgs.filter(bg => bg.id !== id);
+    setCustomBgs(updated);
+    
+    const deletedBg = customBgs.find(bg => bg.id === id);
+    if (deletedBg && bgImage === deletedBg.url) {
+      const randomDefault = BACKGROUNDS[Math.floor(Math.random() * BACKGROUNDS.length)].url;
+      setBgImage(randomDefault);
+      localStorage.setItem('arcane_dice_bg_image', randomDefault);
+    }
+
+    try {
+      localStorage.setItem('arcane_dice_custom_bgs', JSON.stringify(updated));
+    } catch (err) {
+      console.error("Failed to update custom backgrounds in localStorage", err);
+    }
+  };
+
   const [material, setMaterial] = useState<DiceMaterial>('rolling');
   const [bgOpacity, setBgOpacity] = useState<number>(() => {
     const saved = localStorage.getItem('arcane_dice_bg_opacity');
@@ -264,18 +337,35 @@ export default function App() {
       const selectedMaterial = MATERIALS.find(m => m.id === material) || MATERIALS[0];
       
       let notation: string | string[] = '';
+      let d100Count = 0;
+
       if (isPoolRoll) {
+        d100Count = selectedPool.d100 || 0;
         // Construct composite notation array from selectedPool for 3D physics engine to roll multiple groups correctly
-        const parts = (Object.entries(selectedPool) as [DiceType, number][])
+        const parts: string[] = [];
+        (Object.entries(selectedPool) as [DiceType, number][])
           .filter(([_, count]) => count > 0)
-          .map(([type, count]) => `${count}${type}`);
+          .forEach(([type, count]) => {
+            if (type === 'd100') {
+              parts.push(`${count}d100`);
+              parts.push(`${count}d10`);
+            } else {
+              parts.push(`${count}${type}`);
+            }
+          });
         notation = parts;
       } else {
         const diceType = singleDiceType || activeDice;
         const isAdvantageRoll = advantageMode === 'advantage';
         const isDisadvantageRoll = advantageMode === 'disadvantage';
         const actualCount = (isAdvantageRoll || isDisadvantageRoll) ? 2 : count;
-        notation = `${actualCount}${diceType}`;
+        
+        if (diceType === 'd100') {
+          d100Count = actualCount;
+          notation = [`${actualCount}d100`, `${actualCount}d10`];
+        } else {
+          notation = `${actualCount}${diceType}`;
+        }
         setActiveDice(diceType);
       }
 
@@ -301,6 +391,10 @@ export default function App() {
       let totalSum = 0;
 
       if (result && Array.isArray(result)) {
+        const tensRolls: any[] = [];
+        const d10Rolls: any[] = [];
+        const otherGroups: any[] = [];
+
         result.forEach((group: any) => {
           if (group) {
             let typeStr = "";
@@ -314,22 +408,55 @@ export default function App() {
             }
             const groupType = typeStr as DiceType;
 
-            if (Array.isArray(group.rolls)) {
-              group.rolls.forEach((r: any) => {
-                parsedRolls.push({
-                  type: groupType,
-                  value: r.value
-                });
-                totalSum += r.value;
-              });
-            } else if (group.value !== undefined) {
-              parsedRolls.push({
-                type: groupType,
-                value: group.value
-              });
-              totalSum += group.value;
+            const rollsList = Array.isArray(group.rolls)
+              ? group.rolls
+              : (group.value !== undefined ? [{ value: group.value }] : []);
+
+            if (groupType === 'd100') {
+              tensRolls.push(...rollsList);
+            } else if (groupType === 'd10') {
+              d10Rolls.push(...rollsList);
+            } else {
+              otherGroups.push({ type: groupType, rolls: rollsList });
             }
           }
+        });
+
+        // Pair d100 (tens) with d10 (units)
+        const pairedCount = Math.min(tensRolls.length, d10Rolls.length);
+        for (let i = 0; i < pairedCount; i++) {
+          const T = tensRolls[i].value;
+          const U = d10Rolls[i].value;
+          const u = U % 10;
+          let val = T + u;
+          if (T === 0 && u === 0) {
+            val = 100;
+          }
+          parsedRolls.push({
+            type: 'd100',
+            value: val
+          });
+          totalSum += val;
+        }
+
+        // Remaining d10s (if any, e.g., regular pool rolls)
+        for (let i = pairedCount; i < d10Rolls.length; i++) {
+          parsedRolls.push({
+            type: 'd10',
+            value: d10Rolls[i].value
+          });
+          totalSum += d10Rolls[i].value;
+        }
+
+        // Other groups (d4, d6, d8, d12, d20)
+        otherGroups.forEach((g) => {
+          g.rolls.forEach((r: any) => {
+            parsedRolls.push({
+              type: g.type,
+              value: r.value
+            });
+            totalSum += r.value;
+          });
         });
       }
 
@@ -1289,26 +1416,85 @@ export default function App() {
                     </div>
                   </div>
 
-                  <div className="flex flex-col gap-3">
-                    {BACKGROUNDS.map(bg => (
-                      <button
-                        key={bg.id}
-                        onClick={() => setBgImage(bg.url)}
-                        className={cn(
-                          "relative h-20 rounded-xl overflow-hidden border transition-all duration-300 group flex items-center justify-center",
-                          bgImage === bg.url ? "border-slate-300 shadow-[0_0_15px_rgba(255,255,255,0.2)]" : "border-slate-800 hover:border-slate-500"
-                        )}
-                      >
-                        <div 
-                          className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
-                          style={{ backgroundImage: `url(${bg.url})` }}
-                        />
-                        <div className="absolute inset-0 bg-black/50 group-hover:bg-black/30 transition-colors" />
-                        <span className="relative z-10 font-serif tracking-widest text-slate-200 font-bold drop-shadow-md">
-                          {bg.name}
-                        </span>
-                      </button>
-                    ))}
+                  {/* Custom Background Upload & List */}
+                  <div className="bg-slate-950/40 p-4 rounded-xl border border-slate-800 space-y-3">
+                    <span className="text-xs font-serif uppercase tracking-wider text-slate-400 block">Custom Backdrops</span>
+                    
+                    <label className="flex flex-col items-center justify-center border border-dashed border-slate-700 hover:border-slate-500 rounded-xl p-4 cursor-pointer hover:bg-slate-900/40 transition-all group">
+                      <div className="flex flex-col items-center gap-1.5 text-center">
+                        <Upload className="w-5 h-5 text-slate-400 group-hover:text-slate-200 transition-colors" />
+                        <span className="text-xs text-slate-300 font-serif">Upload Image or GIF</span>
+                        <span className="text-[10px] text-slate-500 font-sans">GIF, PNG, JPG supported</span>
+                      </div>
+                      <input 
+                        type="file" 
+                        accept="image/*" 
+                        onChange={handleBgUpload} 
+                        className="hidden" 
+                      />
+                    </label>
+
+                    {customBgs.length > 0 && (
+                      <div className="grid grid-cols-2 gap-2 pt-1">
+                        {customBgs.map(bg => (
+                          <div
+                            key={bg.id}
+                            onClick={() => {
+                              setBgImage(bg.url);
+                              localStorage.setItem('arcane_dice_bg_image', bg.url);
+                            }}
+                            className={cn(
+                              "relative h-16 rounded-lg overflow-hidden border transition-all duration-300 cursor-pointer group flex items-center justify-center",
+                              bgImage === bg.url ? "border-slate-300 shadow-[0_0_10px_rgba(255,255,255,0.15)]" : "border-slate-800 hover:border-slate-600"
+                            )}
+                          >
+                            <div 
+                              className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
+                              style={{ backgroundImage: `url(${bg.url})` }}
+                            />
+                            <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors" />
+                            <span className="relative z-10 px-2 text-center text-[10px] font-sans text-slate-200 font-medium truncate w-full drop-shadow">
+                              {bg.name}
+                            </span>
+                            <button
+                              onClick={(e) => handleDeleteCustomBg(bg.id, e)}
+                              className="absolute top-1 right-1 z-20 p-1 bg-black/75 hover:bg-rose-500/90 text-slate-400 hover:text-white rounded-md transition-colors opacity-0 group-hover:opacity-100 shadow"
+                              title="Delete Backdrop"
+                            >
+                              <Trash2 className="w-3 h-3" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="space-y-3">
+                    <span className="text-xs font-serif uppercase tracking-wider text-slate-400 block px-1">Preset Environments</span>
+                    <div className="flex flex-col gap-3">
+                      {BACKGROUNDS.map(bg => (
+                        <button
+                          key={bg.id}
+                          onClick={() => {
+                            setBgImage(bg.url);
+                            localStorage.setItem('arcane_dice_bg_image', bg.url);
+                          }}
+                          className={cn(
+                            "relative h-20 rounded-xl overflow-hidden border transition-all duration-300 group flex items-center justify-center",
+                            bgImage === bg.url ? "border-slate-300 shadow-[0_0_15px_rgba(255,255,255,0.2)]" : "border-slate-800 hover:border-slate-500"
+                          )}
+                        >
+                          <div 
+                            className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
+                            style={{ backgroundImage: `url(${bg.url})` }}
+                          />
+                          <div className="absolute inset-0 bg-black/50 group-hover:bg-black/30 transition-colors" />
+                          <span className="relative z-10 font-serif tracking-widest text-slate-200 font-bold drop-shadow-md">
+                            {bg.name}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 </section>
                 
