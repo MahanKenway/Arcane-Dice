@@ -8,15 +8,13 @@
   "material": {
     "type": "color",
     "diffuseTexture": {
-      "light": "diffuseTexture_light.png",
-      "dark": "diffuseTexture_dark.png"
+      "light": "pips-light.png",
+      "dark": "pips-dark.png"
     },
     "diffuseLevel": 1,
-    "bumpTexture": "bumpTexture.png",
+    "bumpTexture": "pips-normal.png",
     "bumpLevel": 0.75
   },
-  "diceAvailable": [
-    "pip"
-  ],
+  "diceAvailable": ["pip"],
   "themeColor": "#FFFFFF"
 }

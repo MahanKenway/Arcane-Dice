@@ -7,19 +7,12 @@
   "material": {
     "type": "standard",
     "diffuseTexture": "diffuse.png",
-    "specularTexture": "specularTexture.png",
+    "specularTexture": "specular.png",
     "specularPower": 1,
     "diffuseLevel": 1.3,
-    "bumpTexture": "bumpTexture.png",
+    "bumpTexture": "normal.png",
     "bumpLevel": 1
   },
-  "diceAvailable": [
-    "boost",
-    "setback",
-    "ability",
-    "difficulty",
-    "challenge",
-    "proficiency"
-  ],
+  "diceAvailable": ["boost", "setback", "ability", "difficulty", "challenge", "proficiency"],
   "d4FaceDown": false
 }

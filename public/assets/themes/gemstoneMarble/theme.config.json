@@ -8,19 +8,11 @@
   "material": {
     "type": "standard",
     "diffuseTexture": "diffuse.jpg",
-    "bumpTexture": "bumpTexture.png",
-    "specularTexture": "specularTexture.jpg",
+    "bumpTexture": "normal.png",
+    "specularTexture": "roughness.jpg",
     "diffuseLevel": 1.3,
     "bumpLevel": 0.5
   },
   "d4FaceDown": false,
-  "diceAvailable": [
-    "d4",
-    "d6",
-    "d8",
-    "d10",
-    "d12",
-    "d20",
-    "d100"
-  ]
+  "diceAvailable": ["d4","d6","d8","d10","d12","d20","d100"]
 }

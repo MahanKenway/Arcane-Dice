@@ -8,21 +8,13 @@
   "material": {
     "type": "color",
     "diffuseTexture": {
-      "light": "diffuseTexture_light.png",
-      "dark": "diffuseTexture_dark.png"
+      "light": "gemstone-light.png",
+      "dark": "gemstone-dark.png"
     },
-    "bumpTexture": "bumpTexture.png",
+    "bumpTexture": "normal.png",
     "diffuseLevel": 1,
     "bumpLevel": 0.5
   },
   "d4FaceDown": false,
-  "diceAvailable": [
-    "d4",
-    "d6",
-    "d8",
-    "d10",
-    "d12",
-    "d20",
-    "d100"
-  ]
+  "diceAvailable": ["d4","d6","d8","d10","d12","d20","d100"]
 }

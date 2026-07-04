@@ -7,18 +7,11 @@
   "material": {
     "type": "standard",
     "diffuseTexture": "diffuse.jpg",
-    "bumpTexture": "bumpTexture.png",
-    "specularTexture": "specularTexture.jpg",
+    "bumpTexture": "normal.png",
+    "specularTexture": "metallic.jpg",
     "diffuseLevel": 1,
     "bumpLevel": 1,
     "specularPower": 1
   },
-  "diceAvailable": [
-    "a",
-    "b",
-    "c",
-    "d",
-    "p",
-    "s"
-  ]
+  "diceAvailable": ["a","b","c","d","p","s"]
 }

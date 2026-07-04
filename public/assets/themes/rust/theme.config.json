@@ -6,23 +6,15 @@
   "material": {
     "type": "color",
     "diffuseTexture": {
-      "light": "diffuseTexture_light.png",
-      "dark": "diffuseTexture_dark.png"
+      "light": "diffuse-light.png",
+      "dark": "diffuse-dark.png"
     },
     "diffuseLevel": 1,
-    "bumpTexture": "bumpTexture.png",
+    "bumpTexture": "normal.png",
     "bumpLevel": 1,
-    "specularTexture": "specularTexture.jpg",
+    "specularTexture": "specular.jpg",
     "specularPower": 1
   },
   "themeColor": "#aa4f4a",
-  "diceAvailable": [
-    "d4",
-    "d6",
-    "d8",
-    "d10",
-    "d12",
-    "d20",
-    "d100"
-  ]
+  "diceAvailable": ["d4","d6","d8","d10","d12","d20","d100"]
 }

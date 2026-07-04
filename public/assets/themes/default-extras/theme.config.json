@@ -8,17 +8,13 @@
   "material": {
     "type": "color",
     "diffuseTexture": {
-      "light": "diffuseTexture_light.png",
-      "dark": "diffuseTexture_dark.png"
+      "light": "light.png",
+      "dark": "dark.png"
     },
     "diffuseLevel": 1,
-    "bumpTexture": "bumpTexture.png",
+    "bumpTexture": "normal-extras.png",
     "bumpLevel": 1
   },
-  "diceAvailable": [
-    "pip",
-    "fate",
-    "d2"
-  ],
+  "diceAvailable": ["pip", "fate", "d2"],
   "themeColor": "#FFFFFF"
 }
