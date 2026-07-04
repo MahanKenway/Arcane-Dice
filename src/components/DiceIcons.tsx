@@ -1,7 +1,7 @@
 import React from 'react';
 import { cn } from '../utils';
 
-export type DiceMaterial = 'slate' | 'gold' | 'ruby' | 'emerald' | 'amethyst' | 'rock' | 'sapphire' | 'bronze' | 'silver' | 'obsidian' | 'rust' | 'wooden' | 'gemstone' | 'marble' | 'metal_bg' | 'smooth' | 'smooth_pip' | 'rolling' | 'prismatic';
+export type DiceMaterial = 'slate' | 'gold' | 'ruby' | 'emerald' | 'amethyst' | 'rock' | 'sapphire' | 'bronze' | 'silver' | 'obsidian' | 'rust' | 'wooden' | 'gemstone' | 'marble' | 'metal_bg' | 'smooth' | 'smooth_pip' | 'rolling' | 'prismatic' | 'holyc' | 'zig' | 'cobol';
 export type DiceType = 'd4' | 'd6' | 'd8' | 'd10' | 'd12' | 'd20' | 'd100';
 
 interface DiceIconProps extends React.SVGProps<SVGSVGElement> {
@@ -32,6 +32,9 @@ const materials = {
   smooth_pip: { stop1: '#6ee7b7', stop2: '#10b981', stop3: '#065f46', fill: '#022c22', line: '#059669' },
   rolling: { stop1: '#fef08a', stop2: '#f59e0b', stop3: '#b45309', fill: '#451a03', line: '#d97706' },
   prismatic: { stop1: '#ffffff', stop2: '#00ffff', stop3: '#ff00ff', fill: '#0c0721', line: '#2a0e4a' },
+  holyc: { stop1: '#ffffff', stop2: '#fef08a', stop3: '#ca8a04', fill: '#0a0a16', line: '#f59e0b' },
+  zig: { stop1: '#f97316', stop2: '#f3f4f6', stop3: '#4b5563', fill: '#0f172a', line: '#ea580c' },
+  cobol: { stop1: '#4ade80', stop2: '#166534', stop3: '#14532d', fill: '#022c22', line: '#22c55e' },
 };
 
 export function DiceIcon({ className, value, type, isRolling, material = 'slate', ...props }: DiceIconProps) {

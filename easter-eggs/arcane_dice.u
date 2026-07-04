@@ -1,7 +1,36 @@
--- Unison Content-Addressed Distributed Dice Roller
--- Under the hood, this function hash-identifies as unique distributed logic
+-- Unison Functional Content-Addressed Ecosystem
+-- Models dice rolling using Abilities (algebraic effects) for Randomness, Logging, and Audit Trails.
 
-arcaneDice.roll : Nat -> {Random} Nat
-arcaneDice.roll sides =
-  val = Random.nat
-  (val mod sides) + 1
+ability DiceRandom where
+  nextNat : Nat ->{DiceRandom} Nat
+
+ability DiceLogger where
+  logRoll : Text -> Nat -> {DiceLogger} ()
+
+-- Algebraic handler to intercept and resolve Random calculations
+handleRandom : '{DiceRandom} a -> Nat -> a
+handleRandom program seed =
+  impl state =
+    case program of
+      {DiceRandom.nextNat limit -> resume} ->
+        nextSeed = (state * 1103515245 + 12345) mod 2147483648
+        rolled = (nextSeed mod limit) + 1
+        handle (resume rolled) nextSeed
+      {a} -> a
+  handle program seed
+
+-- Algebraic handler to resolve Logging side-effects
+handleLogging : '{DiceLogger} a -> {IO} a
+handleLogging program =
+  case program of
+    {DiceLogger.logRoll label val -> resume} ->
+      printLine ("[" ++ label ++ "] Logged output value: " ++ (Nat.toText val))
+      handleLogging (resume ())
+    {a} -> a
+
+-- Complete functional dice processing pipeline
+executeArcaneRoll : Nat -> {DiceRandom, DiceLogger} Nat
+executeArcaneRoll sides =
+  val = DiceRandom.nextNat sides
+  DiceLogger.logRoll "ARCANE-CORE" val
+  val

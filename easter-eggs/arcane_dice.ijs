@@ -1,9 +1,24 @@
-NB. J Language Implicit Dice Engine
-NB. High-performance vector operations on polyhedral pools
+NB. J Tacit Probability Convolution and Dice Statistics System
+NB. Computes probability distributions of complex dice pools without state loops
 
-rolls =: >: 10 ?@$ 100  NB. Roll 10 d100s
-sorted =: \:~ rolls    NB. Sort descending
-sum =: +/ 3 {. sorted   NB. Sum of top 3 rolls
+NB. Define monadic verb to generate probabilities for a single S-sided die
+die_dist =: (1 & %) @ (1 & +) @ i.
 
-'Rolls: ' ; rolls
-'Top 3 Sum: ' ; sum
+NB. Convolution of two probability vectors (simulating dice addition)
+convolve =: +//. @ (*/)
+
+NB. Dyadic verb to compute exact probability distribution of N d S
+NB. Example: 3 dice_pool 6 returns probability vector for 3d6
+dice_pool =: [ : convolve/ die_dist @ ]
+
+NB. Mean and Variance computations
+mean =: +/ @: (* i. @ #)
+variance =: [ - *&2 @ mean
+
+NB. Run simulation metrics
+prob_3d20 =: 3 dice_pool 20
+expected_mean =: mean prob_3d20
+
+'=== J Language Vectorized Mathematics ==='
+'Probability of rolling minimum score: ' ; 0 { prob_3d20
+'Mathematical Expected Value of 3d20:   ' ; expected_mean

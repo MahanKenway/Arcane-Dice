@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { History, Dices, RotateCcw, Plus, Minus, Settings2, X, Palette, Image as ImageIcon, TrendingUp, TrendingDown, Sparkles, Music, Play, Pause, Upload, Trash2, SkipBack, SkipForward, Volume2 } from 'lucide-react';
+import { History, Dices, RotateCcw, Plus, Minus, Settings2, X, Palette, Image as ImageIcon, TrendingUp, TrendingDown, Sparkles, Music, Play, Pause, Upload, Trash2, SkipBack, SkipForward, Volume2, Terminal, Binary } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from './utils';
 import { RollResult, DiceType } from './gameLogic';
@@ -7,6 +7,7 @@ import { DiceIcon, DiceMaterial } from './components/DiceIcons';
 import { getNarrativeForRoll } from './narrations';
 import { PhysicsDice, PhysicsDiceRef } from './components/PhysicsDice';
 import BardicSoundscapes from './components/BardicSoundscapes';
+import ArcaneVault from './components/ArcaneVault';
 
 import pixelTavernBg from './assets/images/pixel_tavern_1782917884945.jpg';
 import pixelVoidBg from './assets/images/pixel_void_1782917906511.jpg';
@@ -84,7 +85,10 @@ const MATERIALS: { id: DiceMaterial, name: string, color: string, hex: string, t
   { id: 'metal_bg', name: 'Lagoon Metal', color: 'bg-cyan-700', hex: '#0e7490', theme: 'blueGreenMetal' },
   { id: 'smooth', name: 'Rose Smooth', color: 'bg-rose-500', hex: '#f43f5e', theme: 'smooth' },
   { id: 'smooth_pip', name: 'Emerald Smooth Pip', color: 'bg-emerald-500', hex: '#10b981', theme: 'smooth-pip' },
-  { id: 'rolling', name: 'Gold-Flecked Rolling', color: 'bg-yellow-600', hex: '#eab308', theme: 'diceOfRolling' }
+  { id: 'rolling', name: 'Gold-Flecked Rolling', color: 'bg-yellow-600', hex: '#eab308', theme: 'diceOfRolling' },
+  { id: 'holyc', name: 'HolyC Divine', color: 'bg-amber-300 shadow-[0_0_8px_#f59e0b]', hex: '#f59e0b', theme: 'default' },
+  { id: 'zig', name: 'Zig Safe Metal', color: 'bg-orange-500', hex: '#ea580c', theme: 'default' },
+  { id: 'cobol', name: 'COBOL Punchcard', color: 'bg-emerald-600', hex: '#22c55e', theme: 'default' }
 ];
 
 import { auth, db } from './lib/firebase';
@@ -214,6 +218,7 @@ export default function App() {
 
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isVaultOpen, setIsVaultOpen] = useState(false);
   const [isPhysicsReady, setIsPhysicsReady] = useState(false);
   
 
@@ -1497,12 +1502,47 @@ export default function App() {
                     </div>
                   </div>
                 </section>
+
+                {/* Code Sanctum Section */}
+                <section className="pt-4 border-t border-slate-800/60">
+                  <div className="bg-indigo-950/20 border border-indigo-700/30 hover:border-indigo-500/50 rounded-2xl p-5 space-y-4 transition-all duration-300 shadow-lg">
+                    <div className="flex items-center gap-3">
+                      <div className="p-1.5 bg-indigo-500/10 border border-indigo-500/20 rounded-lg text-indigo-400">
+                        <Binary className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <h3 className="text-sm font-semibold text-indigo-300 font-serif tracking-widest uppercase">Esoteric Code Sanctum</h3>
+                        <p className="text-[10px] text-slate-500 font-sans mt-0.5">Explore multiverse compilation algorithms & unlock esoteric dice skins.</p>
+                      </div>
+                    </div>
+                    
+                    <button
+                      onClick={() => {
+                        setIsVaultOpen(true);
+                        setIsSettingsOpen(false);
+                      }}
+                      className="w-full py-2.5 px-4 bg-indigo-600 hover:bg-indigo-500 active:scale-98 text-white rounded-xl text-xs font-semibold uppercase tracking-wider transition-all shadow-md flex items-center justify-center gap-2 border border-indigo-500/30"
+                    >
+                      <Terminal className="w-4 h-4" />
+                      Enter Code Sanctum
+                    </button>
+                  </div>
+                </section>
                 
               </div>
             </motion.div>
           </>
         )}
       </AnimatePresence>
+
+      <ArcaneVault 
+        isOpen={isVaultOpen}
+        onClose={() => setIsVaultOpen(false)}
+        onApplySkin={(newMat) => {
+          setMaterial(newMat);
+        }}
+        currentMaterial={material}
+      />
 
     </div>
   );

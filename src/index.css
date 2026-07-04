@@ -32,6 +32,21 @@
   animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
 }
 
+/* Custom retro terminal styles */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.animate-blink {
+  animation: blink 1s step-end infinite;
+}
+
+/* CRT monitor screen background radial glow */
+.bg-radial-gradient {
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.15) 0%, rgba(0, 0, 0, 0.8) 100%);
+}
+
 /* Force 3D Dice Box Canvas to be full-screen and prevent cropping/clipping */
 #physics-dice-box canvas,
 .dice-box-canvas {
