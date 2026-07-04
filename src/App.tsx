@@ -97,36 +97,7 @@ const MATERIALS: { id: DiceMaterial, name: string, color: string, hex: string, t
   { id: 'cobol', name: 'COBOL Punchcard', color: 'bg-emerald-600', hex: '#22c55e', theme: 'default' }
 ];
 
-import { auth, db } from './lib/firebase';
-import { onAuthStateChanged } from 'firebase/auth';
-import { collection, addDoc, getDocs, query, orderBy, limit } from 'firebase/firestore';
-
 export default function App() {
-  const [user, setUser] = useState<any>(null);
-
-  useEffect(() => {
-    const unsub = onAuthStateChanged(auth, u => {
-      setUser(u);
-      if (u) {
-        // Load history from Firestore
-        const loadHistory = async () => {
-          try {
-            const q = query(collection(db, `users/${u.uid}/history`), orderBy('timestamp', 'desc'), limit(20));
-            const snapshot = await getDocs(q);
-            const loadedHistory = snapshot.docs.map(doc => doc.data() as RollResult);
-            if (loadedHistory.length > 0) {
-              setHistory(loadedHistory);
-            }
-          } catch (e) {
-            console.error("Failed to load history from firestore", e);
-          }
-        };
-        loadHistory();
-      }
-    });
-    return unsub;
-  }, []);
-
   const [history, setHistory] = useState<RollResult[]>([]);
   const [isRolling, setIsRolling] = useState(false);
   const [currentRoll, setCurrentRoll] = useState<RollResult | null>(null);
@@ -301,28 +272,18 @@ export default function App() {
 
   useEffect(() => {
     const saved = localStorage.getItem('arcane_dice_history');
-    if (saved && !user) {
+    if (saved) {
       try {
         setHistory(JSON.parse(saved));
       } catch (e) {
         console.error("Failed to parse history");
       }
     }
-  }, [user]);
+  }, []);
 
   const saveHistory = async (newHistory: RollResult[]) => {
     setHistory(newHistory);
     localStorage.setItem('arcane_dice_history', JSON.stringify(newHistory.slice(0, 20))); // Keep last 20
-    
-    // If logged in, save the latest roll to firestore
-    if (user && newHistory.length > 0) {
-      try {
-        const latestRoll = newHistory[0];
-        await addDoc(collection(db, `users/${user.uid}/history`), latestRoll);
-      } catch (e) {
-        console.error("Failed to save history to firestore", e);
-      }
-    }
   };
 
   const clearHistory = () => {
