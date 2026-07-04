@@ -25,15 +25,31 @@ export const PhysicsDice = forwardRef<PhysicsDiceRef, PhysicsDiceProps>((props, 
     containerRef.current.id = 'physics-dice-box';
     containerRef.current.innerHTML = ''; // Clear container to prevent duplicate canvas elements
     
-    // Calculate asset path dynamically based on window.location for robust GitHub Pages and Web Worker support
-    let basePath = window.location.pathname;
-    if (basePath.endsWith('.html') || basePath.endsWith('.htm')) {
-      const lastSlash = basePath.lastIndexOf('/');
-      basePath = basePath.substring(0, lastSlash + 1);
+    // Detect environment
+    let basePath = '/';
+    try {
+      const hostname = window.location.hostname || '';
+      if (hostname.includes('github.io')) {
+        // Extract repository name dynamically from pathname on GitHub Pages (e.g. "/Arcane-Dice/index.html" -> "/Arcane-Dice/")
+        const repoPath = window.location.pathname;
+        const parts = repoPath.split('/').filter(Boolean);
+        const repoName = parts[0] || 'Arcane-Dice';
+        basePath = `/${repoName}/`;
+      } else if (window.location.pathname && window.location.pathname !== 'blank' && window.location.pathname !== 'srcdoc') {
+        basePath = window.location.pathname;
+        if (basePath.endsWith('.html') || basePath.endsWith('.htm')) {
+          const lastSlash = basePath.lastIndexOf('/');
+          basePath = basePath.substring(0, lastSlash + 1);
+        }
+      }
+    } catch (e) {
+      basePath = '/';
     }
+
     if (!basePath.endsWith('/')) {
       basePath += '/';
     }
+
     const assetPath = `${basePath}assets/`;
     
     // Robust origin detection for sandboxed iframes
@@ -105,12 +121,26 @@ export const PhysicsDice = forwardRef<PhysicsDiceRef, PhysicsDiceProps>((props, 
     // Prefetch themes in the background to avoid initial load delay
     const themesToPreload = ['rock', 'wooden', 'rust', 'diceOfRolling', 'gemstone', 'gemstoneMarble', 'blueGreenMetal', 'smooth', 'smooth-pip'];
     
-    // Dynamically calculate basePath inside prefetch as well
-    let basePath = window.location.pathname;
-    if (basePath.endsWith('.html') || basePath.endsWith('.htm')) {
-      const lastSlash = basePath.lastIndexOf('/');
-      basePath = basePath.substring(0, lastSlash + 1);
+    // Detect environment
+    let basePath = '/';
+    try {
+      const hostname = window.location.hostname || '';
+      if (hostname.includes('github.io')) {
+        const repoPath = window.location.pathname;
+        const parts = repoPath.split('/').filter(Boolean);
+        const repoName = parts[0] || 'Arcane-Dice';
+        basePath = `/${repoName}/`;
+      } else if (window.location.pathname && window.location.pathname !== 'blank' && window.location.pathname !== 'srcdoc') {
+        basePath = window.location.pathname;
+        if (basePath.endsWith('.html') || basePath.endsWith('.htm')) {
+          const lastSlash = basePath.lastIndexOf('/');
+          basePath = basePath.substring(0, lastSlash + 1);
+        }
+      }
+    } catch (e) {
+      basePath = '/';
     }
+
     if (!basePath.endsWith('/')) {
       basePath += '/';
     }
@@ -118,7 +148,8 @@ export const PhysicsDice = forwardRef<PhysicsDiceRef, PhysicsDiceProps>((props, 
     const prefetchThemes = async () => {
       for (const theme of themesToPreload) {
         try {
-          const res = await fetch(`${basePath}assets/themes/${theme}/theme.config.json`);
+          const configUrl = `${basePath}assets/themes/${theme}/theme.config.json`;
+          const res = await fetch(configUrl);
           if (res.ok) {
             const config = await res.json();
             // Preload maps explicitly by recursively finding string assets
@@ -142,8 +173,9 @@ export const PhysicsDice = forwardRef<PhysicsDiceRef, PhysicsDiceProps>((props, 
             addAsset(config.metalnessMap);
 
             for (const asset of assets) {
+              const assetUrl = `${basePath}assets/themes/${theme}/${asset}`;
               // Preload in cache without evaluating
-              fetch(`${basePath}assets/themes/${theme}/${asset}`).catch(() => {});
+              fetch(assetUrl).catch(() => {});
             }
           }
         } catch (e) {
