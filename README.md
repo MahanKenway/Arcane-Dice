@@ -1,6 +1,7 @@
 <div align="center">
 
 # 🎲 Arcane Dice
+<img width="1867" height="914" alt="Image" src="https://github.com/user-attachments/assets/40d8b3b0-9fa8-4b06-b0d7-5b26126da586" />
 
 ### *Roll for initiative. The dungeon master is watching.*
 
