@@ -917,6 +917,7 @@ export default function App() {
 
       {/* Footer Controls */}
       <footer className="relative z-20 bg-slate-950/95 border-t border-slate-800/80 backdrop-blur-2xl p-6 mt-auto shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
+        <div className="max-w-6xl mx-auto mb-4 text-center text-xs text-slate-400"><a className="underline underline-offset-4 hover:text-amber-300" href="./privacy/">Privacy policy</a></div>
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8">
           
           {/* Modifier & Fate (Advantage/Disadvantage) Controls */}
@@ -1538,4 +1539,3 @@ export default function App() {
     </div>
   );
 }
-
